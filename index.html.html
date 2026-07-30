@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="创作追踪">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="创作追踪">
+<meta name="theme-color" content="#2D2A4A">
+<meta name="description" content="30天创作追踪工作台">
+<meta name="format-detection" content="telephone=no">
+<title>30天创作追踪工作台</title>
+<link rel="apple-touch-icon" id="appleTouchIcon" href="">
+<link rel="icon" type="image/svg+xml" id="svgIcon" href="">
+<link rel="mask-icon" id="maskIcon" href="" color="#6C5CE7">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#6C5CE7;--primary-light:#A29BFE;--primary-dark:#5547B8;
+  --accent:#00CEC9;--success:#00B894;--warning:#FDCB6E;--danger:#FF7675;
+  --bg:#F8F9FD;--bg-card:#fff;--bg-sidebar:#2D2A4A;--bg-sidebar-hover:#3D3A5A;
+  --text:#2D3436;--text-light:#636E72;--text-sidebar:#DFE0F0;--text-sidebar-active:#fff;
+  --border:#E9ECF0;--shadow:0 2px 12px rgba(0,0,0,.06);--shadow-lg:0 8px 32px rgba(0,0,0,.12);
+  --radius:14px;--radius-sm:8px;--sidebar-w:240px;
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
+}
+html{font-size:16px;-webkit-text-size-adjust:100%}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh;display:flex;overflow-x:hidden}
+.sidebar{width:var(--sidebar-w);background:var(--bg-sidebar);color:var(--text-sidebar);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:1000;transition:transform .3s;overflow-y:auto}
+.sidebar-header{padding:20px 16px 16px;text-align:center;border-bottom:1px solid rgba(255,255,255,.08)}
+.sidebar-header h1{font-size:1.15rem;color:#fff;font-weight:700}
+.sidebar-header .subtitle{font-size:.75rem;opacity:.6;margin-top:4px}
+.sidebar-header .cycle-info{margin-top:10px;font-size:.72rem;background:rgba(255,255,255,.1);border-radius:6px;padding:4px 8px;display:inline-block}
+.sidebar-nav{flex:1;padding:12px 8px;list-style:none}
+.sidebar-nav li{margin-bottom:2px}
+.sidebar-nav li a{display:flex;align-items:center;gap:10px;padding:12px 14px;color:var(--text-sidebar);text-decoration:none;border-radius:var(--radius-sm);font-size:.9rem;cursor:pointer;transition:all .2s;user-select:none}
+.sidebar-nav li a:hover{background:var(--bg-sidebar-hover)}
+.sidebar-nav li a.active{background:var(--primary);color:var(--text-sidebar-active);font-weight:600}
+.sidebar-nav li a .icon{font-size:1.2rem;width:24px;text-align:center}
+.sidebar-footer{padding:12px 16px;font-size:.7rem;opacity:.5;text-align:center;border-top:1px solid rgba(255,255,255,.08)}
+.main-content{flex:1;margin-left:var(--sidebar-w);min-height:100vh;transition:margin .3s;display:flex;flex-direction:column}
+.mobile-topbar{display:none;position:fixed;top:0;left:0;right:0;height:56px;background:var(--bg-sidebar);color:#fff;z-index:999;align-items:center;padding:0 12px;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.mobile-topbar .menu-btn{background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer;padding:6px;line-height:1}
+.mobile-topbar .topbar-title{font-size:1rem;font-weight:600;flex:1}
+.page-container{padding:24px;max-width:1100px;margin:0 auto;width:100%}
+.card{background:var(--bg-card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:16px}
+.card-title{font-size:1.1rem;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card-title .badge{font-size:.7rem;background:var(--primary-light);color:#fff;padding:2px 8px;border-radius:10px;font-weight:500}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border:none;border-radius:var(--radius-sm);background:var(--primary);color:#fff;font-size:.88rem;cursor:pointer;transition:all .2s;font-family:var(--font)}
+.btn:hover{background:var(--primary-dark);transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn-success{background:var(--success)}.btn-success:hover{background:#009B7D}
+.btn-danger{background:var(--danger)}.btn-danger:hover{background:#E55C5C}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text)}.btn-outline:hover{border-color:var(--primary);color:var(--primary);background:transparent}
+.btn-sm{padding:5px 12px;font-size:.8rem}
+.btn-lg{padding:12px 28px;font-size:1rem}
+.check-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);background:#F7F8FC;margin-bottom:6px;transition:all .2s;cursor:pointer}
+.check-item:hover{background:#EFF1F8}
+.check-item .checkbox{width:20px;height:20px;border:2px solid var(--border);border-radius:5px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;background:#fff}
+.check-item.done .checkbox{background:var(--success);border-color:var(--success)}
+.check-item.done .checkbox::after{content:'✓';color:#fff;font-size:.85rem;font-weight:700}
+.check-item.done .item-text{text-decoration:line-through;color:var(--text-light)}
+.check-item .item-text{flex:1;font-size:.9rem}
+.check-item .item-meta{font-size:.72rem;color:var(--text-light);margin-top:2px}
+.check-item.overdue{border-left:3px solid var(--danger)}
+.check-item.carryover{border-left:3px solid var(--warning);background:#FFF9F0}
+input[type=text],input[type=number],textarea,select{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:.9rem;font-family:var(--font);background:#fff;transition:border-color .2s}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary)}
+textarea{resize:vertical;min-height:80px}
+.daily-quote{background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;border-radius:var(--radius);padding:20px 24px;margin-bottom:20px;text-align:center;position:relative;overflow:hidden}
+.daily-quote::before{content:'✨';position:absolute;top:8px;left:12px;font-size:1.2rem;opacity:.4}
+.daily-quote .quote-text{font-size:1.05rem;font-weight:500;margin-bottom:6px}
+.daily-quote .quote-author{font-size:.8rem;opacity:.85}
+.pet-area{display:flex;align-items:center;gap:20px;padding:16px;background:linear-gradient(135deg,#FFF9F0,#FFF5E6);border-radius:var(--radius);margin-bottom:20px}
+.pet-emoji{font-size:3.5rem;animation:petBounce 2s ease-in-out infinite;filter:drop-shadow(0 4px 8px rgba(0,0,0,.1))}
+.pet-emoji.sleeping{animation:petSleep 3s ease-in-out infinite}
+@keyframes petBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes petSleep{0%,100%{transform:scale(1) rotate(0)}50%{transform:scale(.95) rotate(-3deg)}}
+.pet-info{flex:1}
+.pet-name{font-size:1rem;font-weight:700;margin-bottom:4px}
+.pet-status-text{font-size:.85rem;color:var(--text-light)}
+.pet-mood-bar{margin-top:8px;height:8px;background:rgba(0,0,0,.06);border-radius:4px;overflow:hidden}
+.pet-mood-fill{height:100%;border-radius:4px;transition:width .5s,background .5s}
+.progress-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.progress-card{background:var(--bg-card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);text-align:center}
+.progress-card .pc-icon{font-size:1.5rem;margin-bottom:6px}
+.progress-card .pc-title{font-size:.8rem;color:var(--text-light);margin-bottom:4px}
+.progress-card .pc-value{font-size:1.3rem;font-weight:700}
+.progress-bar{height:6px;background:var(--border);border-radius:3px;margin-top:8px;overflow:hidden}
+.progress-bar .pb-fill{height:100%;border-radius:3px;background:var(--primary);transition:width .5s}
+.badge-wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:10px}
+.badge-item{text-align:center;padding:12px 6px;border-radius:var(--radius-sm);background:#F7F8FC;border:2px solid transparent;transition:all .2s}
+.badge-item.earned{background:linear-gradient(135deg,#FFF9F0,#FFF0E6);border-color:var(--warning)}
+.badge-item.locked{opacity:.35;filter:grayscale(1)}
+.badge-item .b-icon{font-size:1.8rem}
+.badge-item .b-name{font-size:.68rem;margin-top:4px;font-weight:600}
+.badge-item .b-desc{font-size:.62rem;color:var(--text-light);margin-top:2px}
+.day-tabs{display:flex;gap:4px;overflow-x:auto;padding-bottom:8px;margin-bottom:16px;-webkit-overflow-scrolling:touch}
+.day-tab{flex-shrink:0;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:#EEF0F5;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s;position:relative;border:none;color:var(--text)}
+.day-tab:hover{background:var(--primary-light);color:#fff}
+.day-tab.active{background:var(--primary);color:#fff}
+.day-tab.today::after{content:'';position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);width:6px;height:6px;border-radius:50%;background:var(--danger)}
+.day-tab.completed{background:#D4EDDA;color:#155724}
+.day-tab.completed.active{background:var(--success);color:#fff}
+.day-tab.preview{background:#FFF5E6;color:#E17055}
+.day-tab.preview.active{background:#E17055;color:#fff}
+.write-timer-box{display:flex;align-items:center;gap:14px;padding:16px;background:linear-gradient(135deg,#F0F4FF,#E6EFFF);border-radius:var(--radius);margin-bottom:16px;flex-wrap:wrap}
+.write-timer-box .timer-display{font-size:1.6rem;font-weight:700;font-family:'SF Mono',Consolas,monospace;color:var(--primary-dark);min-width:100px}
+.write-timer-box .timer-status{font-size:.8rem;color:var(--text-light)}
+.write-timer-box .timer-actions{display:flex;gap:8px;margin-left:auto}
+.wordcount-box{display:flex;gap:10px;align-items:end;margin-bottom:16px;flex-wrap:wrap}
+.wordcount-box .wc-input-group{flex:1;min-width:140px}
+.wordcount-box label{font-size:.8rem;color:var(--text-light);display:block;margin-bottom:4px}
+.wordcount-result{padding:8px 14px;border-radius:var(--radius-sm);font-size:.85rem;font-weight:600;display:inline-block;margin-top:8px}
+.wordcount-result.pass{background:#D4EDDA;color:#155724}
+.wordcount-result.fail{background:#F8D7DA;color:#721C24}
+.sub-tabs{display:flex;gap:6px;margin-bottom:16px;border-bottom:2px solid var(--border)}
+.sub-tab{padding:10px 20px;border:none;background:none;font-size:.9rem;cursor:pointer;color:var(--text-light);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;font-family:var(--font);font-weight:500}
+.sub-tab:hover{color:var(--primary)}
+.sub-tab.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+.learn-card{background:#F7F8FC;border-radius:var(--radius-sm);padding:14px;margin-bottom:10px}
+.learn-card .lc-title{font-size:.92rem;font-weight:600;margin-bottom:6px}
+.learn-card .lc-content{font-size:.82rem;color:var(--text-light);line-height:1.7}
+.learn-card .lc-tag{display:inline-block;font-size:.7rem;padding:2px 8px;border-radius:4px;background:var(--primary-light);color:#fff;margin-right:4px;margin-bottom:4px}
+.db-filter{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.db-filter .filter-btn{padding:5px 14px;border:1.5px solid var(--border);border-radius:16px;background:#fff;font-size:.8rem;cursor:pointer;transition:all .2s;font-family:var(--font)}
+.db-filter .filter-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.db-entry{background:#F7F8FC;border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px;border-left:3px solid var(--primary)}
+.db-entry .de-header{display:flex;justify-content:space-between;align-items:start;margin-bottom:6px;gap:8px;flex-wrap:wrap}
+.db-entry .de-title{font-size:.88rem;font-weight:600}
+.db-entry .de-date{font-size:.7rem;color:var(--text-light);white-space:nowrap}
+.db-entry .de-content{font-size:.82rem;color:var(--text-light);line-height:1.6;word-break:break-all;white-space:pre-wrap}
+.db-entry .de-tags{margin-top:6px}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:16px}
+.stat-box{background:#F7F8FC;border-radius:var(--radius-sm);padding:14px;text-align:center}
+.stat-box .sb-value{font-size:1.5rem;font-weight:700;color:var(--primary)}
+.stat-box .sb-label{font-size:.78rem;color:var(--text-light);margin-top:4px}
+.chart-container{background:#fff;border-radius:var(--radius-sm);padding:14px;margin-bottom:14px;overflow-x:auto}
+.chart-container .chart-title{font-size:.9rem;font-weight:600;margin-bottom:10px}
+.bar-chart{display:flex;align-items:end;gap:3px;height:120px;padding-top:10px;min-width:400px;position:relative;padding-bottom:24px}
+.bar-chart .bar{flex:1;min-width:12px;background:var(--primary-light);border-radius:3px 3px 0 0;position:relative;transition:height .5s;cursor:pointer;min-height:2px}
+.bar-chart .bar:hover{background:var(--primary)}
+.bar-chart .bar .bar-label{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:.6rem;color:var(--text-light);white-space:nowrap}
+.bar-chart .bar .bar-val{position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:.62rem;color:var(--text);white-space:nowrap}
+.cycle-banner{background:linear-gradient(135deg,#00CEC9,#00B894);color:#fff;border-radius:var(--radius);padding:14px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.cycle-banner .cb-info{font-size:.85rem}
+.cycle-banner .cb-info strong{font-size:1rem}
+.cycle-banner .cb-day-num{font-size:2rem;font-weight:800;line-height:1}
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:2000;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:var(--radius);padding:24px;max-width:480px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:var(--shadow-lg)}
+.modal h3{font-size:1.1rem;margin-bottom:14px}
+.modal p{font-size:.88rem;color:var(--text-light);margin-bottom:14px;line-height:1.6}
+.modal .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap}
+.empty-state{text-align:center;padding:40px 20px;color:var(--text-light)}
+.empty-state .es-icon{font-size:3rem;opacity:.3;margin-bottom:12px}
+.empty-state .es-text{font-size:.9rem}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--text);color:#fff;padding:10px 24px;border-radius:24px;font-size:.85rem;z-index:3000;transition:transform .3s;white-space:nowrap;box-shadow:var(--shadow-lg);max-width:90vw}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.success{background:var(--success)}
+.toast.warning{background:var(--warning);color:#333}
+.carryover-banner{background:#FFF5E6;border:1px solid var(--warning);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:12px;font-size:.82rem;color:#8B6914}
+.carryover-banner strong{color:#E17055}
+.completion-status{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.completion-pill{padding:4px 12px;border-radius:12px;font-size:.78rem;font-weight:600;display:inline-flex;align-items:center;gap:4px}
+.completion-pill.pass{background:#D4EDDA;color:#155724}
+.completion-pill.fail{background:#F8D7DA;color:#721C24}
+.preview-banner{background:linear-gradient(135deg,#FFF5E6,#FFE8D6);border:1px solid #E17055;border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:12px;font-size:.82rem;color:#8B4513;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+@media(max-width:900px){.progress-grid{grid-template-columns:1fr}}
+@media(max-width:900px),all and (orientation:portrait) and (max-width:1100px){
+  :root{--sidebar-w:260px}
+  .sidebar{transform:translateX(-100%);box-shadow:var(--shadow-lg)}
+  .sidebar.open{transform:translateX(0)}
+  .main-content{margin-left:0;padding-top:56px}
+  .mobile-topbar{display:flex}
+  .page-container{padding:14px 12px 40px}
+  .card{padding:14px}
+  .pet-area{flex-direction:column;text-align:center;gap:8px}
+  .pet-emoji{font-size:2.8rem}
+  .badge-wall{grid-template-columns:repeat(auto-fill,minmax(70px,1fr))}
+  .write-timer-box{flex-direction:column;align-items:stretch}
+  .write-timer-box .timer-actions{margin-left:0;justify-content:center}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .cycle-banner{flex-direction:column;text-align:center}
+  .sidebar-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:999}
+  .sidebar-overlay.show{display:block}
+}
+@media(max-width:480px){
+  .stats-grid{grid-template-columns:1fr}
+  .wordcount-box{flex-direction:column;align-items:stretch}
+  .day-tab{width:36px;height:36px;font-size:.8rem}
+}
+@media(min-width:901px) and (max-width:1200px) and (orientation:landscape){
+  :root{--sidebar-w:220px}
+  .page-container{padding:18px}
+  .card{padding:16px}
+  .progress-grid{grid-template-columns:repeat(3,1fr)}
+}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:rgba(0,0,0,.25)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .3s ease}
+@keyframes badgePop{0%{transform:scale(0);opacity:0}50%{transform:scale(1.2)}100%{transform:scale(1);opacity:1}}
+.badge-pop{animation:badgePop .5s ease}
+.hidden{display:none!important}
+.sidebar-actions{display:flex;gap:6px;margin-bottom:8px}
+.sidebar-btn{flex:1;background:rgba(255,255,255,.08)!important;border-color:rgba(255,255,255,.2)!important;color:var(--text-sidebar)!important;font-size:.72rem!important;padding:5px 8px!important;justify-content:center}
+.sidebar-btn:hover{background:rgba(255,255,255,.18)!important;border-color:rgba(255,255,255,.4)!important}
+.storage-info{font-size:.65rem;opacity:.5}
+.outline-option-btn{display:block;width:100%;text-align:left;padding:10px 14px;margin-bottom:8px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:#fff;cursor:pointer;transition:all .2s;font-family:var(--font)}
+.outline-option-btn:hover{border-color:var(--primary);background:#F8F7FF}
+.outline-option-btn .oo-title{font-size:.9rem;font-weight:600;margin-bottom:3px}
+.outline-option-btn .oo-desc{font-size:.75rem;color:var(--text-light)}
+.modal .modal-actions{gap:8px}
+.search-box{margin-bottom:12px}
+.search-box input{background:#F7F8FC;border-color:transparent}
+.search-box input:focus{background:#fff;border-color:var(--primary)}
+.pet-edit-btn{background:none;border:none;color:var(--text-light);font-size:.75rem;cursor:pointer;padding:2px 6px;border-radius:4px}
+.pet-edit-btn:hover{background:rgba(0,0,0,.06);color:var(--primary)}
+.storage-warn{background:#FFF3F3;border:1px solid var(--danger);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:12px;font-size:.82rem;color:var(--danger)}
+.guide-section{margin-top:20px;padding:16px;background:#F7F8FC;border-radius:var(--radius);font-size:.82rem;color:var(--text-light);line-height:1.8}
+.guide-section strong{color:var(--text)}
+.outline-mode-btn{font-size:.75rem!important;padding:4px 10px!important;opacity:.5}
+.outline-mode-btn.active{opacity:1;background:var(--primary)!important;color:#fff!important;border-color:var(--primary)!important}
+.install-banner{position:fixed;bottom:0;left:0;right:0;background:var(--bg-sidebar);color:#fff;padding:16px;display:flex;align-items:center;gap:12px;z-index:5000;box-shadow:0 -4px 20px rgba(0,0,0,.15);transform:translateY(100%);transition:transform .35s ease}
+.install-banner.show{transform:translateY(0)}
+.install-banner .ib-icon{font-size:2.2rem;flex-shrink:0;animation:bounceIn .6s}
+.install-banner .ib-text{flex:1;font-size:.82rem;line-height:1.5;min-width:0}
+.install-banner .ib-text strong{font-size:.92rem;display:block;margin-bottom:2px}
+.install-banner .ib-text b{display:block;margin-bottom:2px;font-size:.85rem}
+.install-banner .ib-btn{background:var(--primary);color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:.85rem;cursor:pointer;white-space:nowrap;font-family:var(--font);font-weight:600;letter-spacing:.3px;transition:background .2s}
+.install-banner .ib-btn:active{background:var(--primary-dark)}
+.install-banner .ib-close{background:none;border:none;color:rgba(255,255,255,.4);font-size:1.3rem;cursor:pointer;padding:6px;line-height:1;align-self:flex-start}
+@keyframes bounceIn{0%{transform:scale(0)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+/* ===== 新增样式：可视化 / 宠物等级 / 备注提醒 / 数据库分栏 ===== */
+.bubble-chart{position:relative;height:160px;max-height:160px;margin:6px 0 28px;background:linear-gradient(180deg,#F7F8FC,#fff);border-radius:8px;overflow:hidden;flex-shrink:0}
+.bubble-chart .hour-grid{position:absolute;top:0;bottom:22px;width:1px;background:rgba(0,0,0,.05)}
+.bubble-chart .hour-label{position:absolute;bottom:0;transform:translateX(-50%);font-size:.6rem;color:var(--text-light)}
+.bubble{position:absolute;transform:translate(-50%,50%);border-radius:50%;opacity:.82;cursor:pointer;transition:transform .2s,opacity .2s;border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.18)}
+.bubble:hover{opacity:1;transform:translate(-50%,50%) scale(1.18);z-index:6}
+.bubble-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.75rem;color:var(--text-light);margin-bottom:4px}
+.bubble-legend .lg{display:inline-flex;align-items:center;gap:5px}
+.bubble-legend .dot{width:10px;height:10px;border-radius:50%}
+.session-timeline{max-height:380px;overflow-y:auto;padding-right:4px}
+.session-day{margin-bottom:10px}
+.session-day .sd-date{font-size:.8rem;font-weight:600;color:var(--text);margin-bottom:4px;position:sticky;top:0;background:#fff;padding:3px 0;z-index:2}
+.session-item{display:flex;align-items:center;gap:8px;padding:6px 10px;background:#F7F8FC;border-radius:6px;margin-bottom:4px;font-size:.78rem}
+.session-item .si-type{font-size:.68rem;padding:1px 7px;border-radius:8px;color:#fff;white-space:nowrap}
+.session-item .si-time{font-weight:600;min-width:46px}
+.session-item .si-words{margin-left:auto;font-weight:600;color:var(--primary)}
+.session-item .si-dur{color:var(--text-light);font-size:.7rem}
+.range-selector{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.range-selector .filter-btn{padding:5px 12px;border:1.5px solid var(--border);border-radius:16px;background:#fff;font-size:.78rem;cursor:pointer;transition:all .2s;font-family:var(--font)}
+.range-selector .filter-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.range-selector input[type=number]{width:84px;padding:5px 10px}
+.level-badge{font-size:.68rem;background:linear-gradient(135deg,#FDCB6E,#E17055);color:#fff;padding:2px 8px;border-radius:10px;font-weight:600;margin-left:6px;vertical-align:middle}
+.pet-level-info{font-size:.72rem;color:var(--text-light);margin-top:5px}
+.pet-level-info b{color:var(--primary)}
+.reminder-banner{background:#F0F4FF;border:1px solid var(--primary-light);border-radius:var(--radius-sm);padding:10px 14px;margin:10px 0;font-size:.82rem;color:var(--primary-dark)}
+.reminder-banner strong{color:var(--primary)}
+.template-mode-note{font-size:.75rem;color:var(--text-light);margin-top:4px}
+.db-maintabs{display:flex;gap:6px;margin-bottom:16px;border-bottom:2px solid var(--border)}
+.summary-card{background:#F7F8FC;border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px}
+.summary-card .sc-date{font-size:.82rem;font-weight:600;margin-bottom:4px}
+.summary-card textarea{min-height:60px;background:#fff}
+</style>
+<script>
+// ===== PWA 图标 =====
+// 图标读取同目录下的 icon.png 文件，若不存在则使用内置 SVG 兜底
+(function(){
+  const iconPath='icon.png';
+  const fallbackSvg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6C5CE7"/><stop offset="100%" stop-color="#A29BFE"/></linearGradient></defs><rect width="512" height="512" rx="100" fill="url(#bg)"/><text x="256" y="280" text-anchor="middle" font-size="220" font-family="sans-serif" fill="#fff">✍️</text><text x="256" y="410" text-anchor="middle" font-size="64" font-family="sans-serif" font-weight="bold" fill="#fff" opacity="0.9">30</text></svg>`;
+
+  function setupIcons(iconDataUrl){
+    // Apple touch icon
+    document.getElementById('appleTouchIcon').href=iconDataUrl;
+    document.getElementById('svgIcon').href=iconDataUrl;
+    document.getElementById('maskIcon').href=iconDataUrl;
+    // Manifest
+    const manifest={name:"30天创作追踪工作台",short_name:"创作追踪",description:"30天创作计划追踪工具",start_url:location.href.split('?')[0],display:"standalone",background_color:"#2D2A4A",theme_color:"#6C5CE7",orientation:"portrait",icons:[{src:iconDataUrl,sizes:"512x512",type:"image/png",purpose:"any maskable"}]};
+    const blob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const l=document.createElement('link');l.rel='manifest';l.href=url;document.head.appendChild(l);
+  }
+
+  // 尝试加载 icon.png
+  const img=new Image();
+  img.onload=function(){
+    // icon.png 存在，缩放到 180px（Apple touch icon）和 512px（manifest）
+    const sizes=[{w:180,id:'apple'},{w:512,id:'manifest'}];
+    const canvas512=document.createElement('canvas');canvas512.width=512;canvas512.height=512;
+    canvas512.getContext('2d').drawImage(img,0,0,512,512);
+    const dataUrl512=canvas512.toDataURL('image/png');
+
+    const canvas180=document.createElement('canvas');canvas180.width=180;canvas180.height=180;
+    canvas180.getContext('2d').drawImage(img,0,0,180,180);
+    const dataUrl180=canvas180.toDataURL('image/png');
+
+    document.getElementById('appleTouchIcon').href=dataUrl180;
+    document.getElementById('svgIcon').href=dataUrl512;
+    document.getElementById('maskIcon').href=dataUrl512;
+
+    const manifest={name:"30天创作追踪工作台",short_name:"创作追踪",description:"30天创作计划追踪工具",start_url:location.href.split('?')[0],display:"standalone",background_color:"#2D2A4A",theme_color:"#6C5CE7",orientation:"portrait",icons:[{src:dataUrl512,sizes:"512x512",type:"image/png",purpose:"any maskable"}]};
+    const blob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const l=document.createElement('link');l.rel='manifest';l.href=url;document.head.appendChild(l);
+  };
+  img.onerror=function(){
+    // 兜底：用 SVG 生成图标
+    const canvas=document.createElement('canvas');canvas.width=512;canvas.height=512;
+    const ctx=canvas.getContext('2d');const svgImg=new Image();
+    svgImg.onload=function(){
+      ctx.drawImage(svgImg,0,0);
+      const dataUrl512=canvas.toDataURL('image/png');
+      const c180=document.createElement('canvas');c180.width=180;c180.height=180;
+      c180.getContext('2d').drawImage(canvas,0,0,180,180);
+      const dataUrl180=c180.toDataURL('image/png');
+      document.getElementById('appleTouchIcon').href=dataUrl180;
+      document.getElementById('svgIcon').href=dataUrl512;
+      document.getElementById('maskIcon').href=dataUrl512;
+      const manifest={name:"30天创作追踪工作台",short_name:"创作追踪",description:"30天创作计划追踪工具",start_url:location.href.split('?')[0],display:"standalone",background_color:"#2D2A4A",theme_color:"#6C5CE7",orientation:"portrait",icons:[{src:dataUrl512,sizes:"512x512",type:"image/png",purpose:"any maskable"}]};
+      const blob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
+      const url=URL.createObjectURL(blob);
+      const l=document.createElement('link');l.rel='manifest';l.href=url;document.head.appendChild(l);
+    };
+    svgImg.src='data:image/svg+xml,'+encodeURIComponent(fallbackSvg);
+  };
+  img.src=iconPath;
+})();
+
+// ===== Service Worker 注册 =====
+if('serviceWorker' in navigator){
+  const swCode=`
+const CACHE='creative-tracker-v2';
+const ASSETS=[self.location.href];
+self.addEventListener('install',e=>{
+  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));
+});
+self.addEventListener('activate',e=>{
+  e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
+});
+self.addEventListener('fetch',e=>{
+  if(e.request.method!=='GET')return;
+  e.respondWith(
+    caches.match(e.request).then(r=>r||fetch(e.request).then(resp=>{
+      if(resp.ok){const clone=resp.clone();caches.open(CACHE).then(c=>c.put(e.request,clone));}
+      return resp;
+    }).catch(()=>caches.match(e.request)))
+  );
+});`;
+  const swBlob=new Blob([swCode],{type:'application/javascript'});
+  const swUrl=URL.createObjectURL(swBlob);
+  // 由于 blob URL 的 SW 作用域限制，我们使用内联方式
+  // 实际部署时替换为同域下的 sw.js
+  navigator.serviceWorker.register('data:application/javascript,'+encodeURIComponent(swCode),{scope:'/'}).catch(()=>{
+    // 降级：尝试注册内联 SW（部分浏览器支持）
+    console.log('SW registration note: 独立文件部署时生效');
+  });
+}
+</script>
+</head>
+<body>
+<div class="install-banner" id="installBanner">
+  <div class="ib-icon">📱</div>
+  <div class="ib-text"><strong>安装为 App</strong><span id="installTip">点击下方按钮或用浏览器菜单"添加到主屏幕"</span></div>
+  <button class="ib-btn" id="installBtn" style="display:none">安装</button>
+  <button class="ib-close" onclick="document.getElementById('installBanner').classList.remove('show')">✕</button>
+</div>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="mobile-topbar">
+  <button class="menu-btn" id="menuBtn">☰</button>
+  <span class="topbar-title" id="topbarTitle">计划进度</span>
+</div>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h1>✦ 创作追踪</h1>
+    <div class="subtitle">30天计划工作台</div>
+    <div class="cycle-info" id="sidebarCycleInfo">未开启周期</div>
+  </div>
+  <ul class="sidebar-nav">
+    <li><a data-page="progress" class="active"><span class="icon">📊</span> 计划进度</a></li>
+    <li><a data-page="novel"><span class="icon">📖</span> 长篇小说</a></li>
+    <li><a data-page="short"><span class="icon">✍️</span> 短篇小说</a></li>
+    <li><a data-page="vlog"><span class="icon">🎬</span> Vlog</a></li>
+    <li><a data-page="database"><span class="icon">📚</span> 学习归纳数据库</a></li>
+  </ul>
+  <div class="sidebar-footer">
+    <div class="sidebar-actions">
+      <button class="btn btn-sm btn-outline sidebar-btn" onclick="exportData()">📤 导出备份</button>
+      <button class="btn btn-sm btn-outline sidebar-btn" onclick="exportDatabaseBackup()">📚 库备份</button>
+      <button class="btn btn-sm btn-outline sidebar-btn" onclick="document.getElementById('importFileInput').click()">📥 导入恢复</button>
+      <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importData(this)">
+    </div>
+    <div class="storage-info"><span id="storageUsage">--</span> · <span id="lastSaveTime">--</span></div>
+  </div>
+</aside>
+<main class="main-content"><div class="page-container" id="pageContainer"></div></main>
+<div class="modal-overlay" id="modalOverlay"><div class="modal" id="modalContent"></div></div>
+<div class="toast" id="toast"></div>
+<script>
+/* ========== 默认模板常量 ========== */
+const SHORT_WRITE_DEFAULT=[
+  {day:1,tasks:['拆解1-2篇对标爆款','确定本篇核心卖点','列出3个备选选题']},
+  {day:2,tasks:['确定选题','搭建故事框架（三幕剧）','确定主角人设和核心冲突']},
+  {day:3,tasks:['写详细大纲（含关键场景）','确定反转点和高潮','预估字数分配']},
+  {day:4,tasks:['动笔写第一幕（约2000字）','建立日常世界和触发事件']},
+  {day:5,tasks:['动笔写第二幕上半（约2000字）','主角应对挑战，危机升级']},
+  {day:6,tasks:['动笔写第二幕下半（约2000字）','主角进入最低谷']},
+  {day:7,tasks:['动笔写第三幕（约2000字）','最终对决与解决']},
+  {day:8,tasks:['通读全文','标注需要修改的段落','检查节奏和伏笔']},
+  {day:9,tasks:['精修第一遍（语言和细节）','删除冗余，强化冲突','检查人物一致性']},
+  {day:10,tasks:['精修第二遍（润色）','拟3个备选标题','发布并记录数据']}
+];
+const SHORT_LEARN_DEFAULT=[
+  {tag:'结构拆解',title:'「三幕剧」短篇小说结构模板',content:'第一幕（占全文25%）：建立日常世界 → 触发事件打破平衡。第二幕（占50%）：主角应对挑战 → 危机升级 → 最低谷。第三幕（占25%）：最终对决 → 解决 → 新平衡。适合8000-12000字的短篇，每幕分别约2000-3000-2000字。'},
+  {tag:'开头技巧',title:'「黄金三行」开头法',content:'第一行：制造悬念或冲突。第二行：暗示人物核心矛盾。第三行：给出一个看似解决实际加深问题的行动。案例：「我在离婚协议上签字的那天，天气预报说有雨。我没带伞。他也没带。」——用一个日常行为折射关系破裂。'},
+  {tag:'人物塑造',title:'「缺点先行」人物速建法',content:'短篇篇幅有限，不要铺陈人物全貌。用1个核心缺点+1个反差行为快速立人设。如：一个贪财的中年女人，却每周给流浪猫买罐头。缺点让人物真实，反差让人物立体，600字内可完成。'},
+  {tag:'冲突设计',title:'「两难抉择」冲突引擎',content:'最有效的短篇冲突是两难：主角必须在两个都有代价的选项中选择。案例：举报同事能升职，但同事是唯一帮她带孩子的朋友。两难冲突自带戏剧张力，能撑起整篇故事。'},
+  {tag:'结尾技巧',title:'「反转+留白」结尾法',content:'短篇结尾需要余韵。方法：在最后200字埋一个信息反转（如：一直以为是受害者的人其实是加害者），然后用一个意象收束（如：窗台上的花终于开了），不要解释，让读者自己品味。'},
+  {tag:'变现技巧',title:'短篇变现的5个热门赛道',content:'①情感婚姻类（读者基数大，共鸣强）②悬疑反转类（完读率高，易传播）③都市职场类（代入感强，广告价值高）④奇幻仙侠类（IP改编机会多）⑤现实题材类（评奖机会多）。建议先深耕1个赛道建立读者群。'},
+  {tag:'平台分析',title:'主流短篇平台特点',content:'知乎盐选：偏好悬疑/反转/情感，3000-15000字，付费阅读分成。番茄小说：偏好爽文/逆袭，1-5万字，按阅读时长分成。豆瓣阅读：偏好文学性强的现实题材，5000-30000字，有评奖机会。微信公众号：偏好情感共鸣类，2000-5000字，靠流量主和打赏。'},
+  {tag:'爆款规律',title:'「数据驱动」选题法',content:'不要凭感觉选题。方法：①在目标平台搜热榜关键词 ②记录前20名标题的共同元素 ③用「主角身份+核心冲突+反转点」公式拟5个选题 ④在小红书/微博搜相关话题看热度 ⑤选热度高+差异化空间大的写。'}
+];
+const VLOG_CREATE_DEFAULT=[
+  {day:1,tasks:['确定本条主题和角度','写脚本框架（开头钩子+核心内容+结尾）','拟定标题和封面方案']},
+  {day:2,tasks:['完善脚本细节','列出拍摄清单（场地/道具/镜头）','准备拍摄素材']},
+  {day:3,tasks:['拍摄主要素材','拍摄空镜/转场素材','补录口播（如需要）']},
+  {day:4,tasks:['粗剪（按脚本拼接素材）','精剪（节奏/转场/配乐）','加字幕和封面']},
+  {day:5,tasks:['发布视频','写文案和标签','在多个平台分发']},
+  {day:6,tasks:['复盘数据（播放/点赞/评论）','记录有效和无效的做法','为下一条优化方向']}
+];
+const VLOG_LEARN_DEFAULT=[
+  {tag:'对标账号',title:'「北漂失业/出租屋」题材账号方向',content:'搜索关键词：北漂日记、失业日常、出租屋生活、北京省钱。观察要点：①封面风格（真实/美化/文字密集）②开头3秒钩子 ③内容结构（一天流程/单点深聊/对比反差）④评论区痛点提取 ⑤变现方式（广告/带货/知识付费）。建议在小红书和抖音分别找5个高赞账号对标。'},
+  {tag:'对标账号',title:'「减肥日常」题材账号方向',content:'搜索关键词：减肥日记、减肥餐、运动打卡、减脂日常。观察要点：①数据呈现（体重曲线/热量数字）②前后对比 ③食谱分享形式 ④失败/暴食的真实记录（共鸣感强）⑤系列化更新（打卡第N天）。建议关注分享过程而非只晒结果的账号。'},
+  {tag:'对标账号',title:'「日常生活日常」题材账号方向',content:'搜索关键词：独居日记、下班日常、周末vlog、一人食。观察要点：①生活美学（色调/配乐/节奏）②ASMR元素（做饭/收纳声音）③情绪共鸣点 ④固定栏目设计 ⑤场景复用率。建议学习「平凡日常拍出治愈感」的镜头语言。'},
+  {tag:'封面教学',title:'小红书封面设计要点',content:'尺寸：3:4竖版。核心元素：①大字标题（2-4个字，占封面1/3）②人物/场景实拍图 ③对比图/数字标注 ④色系统一（暖色调/冷色调）。工具推荐：醒图/黄油相机/Canva。关键：标题要有「冲突感或利益点」，如「失业第30天｜我活下来了」比「失业日记」点击率高3倍。'},
+  {tag:'封面教学',title:'抖音封面/封面图选择',content:'抖音封面三秒法则：①选最有张力的画面（表情/动作/对比）②加粗体大字（2-4字）③避免文字被点赞/评论按钮遮挡。系列视频建议统一封面模板，形成视觉记忆点。'},
+  {tag:'剪辑知识',title:'Vlog剪辑节奏把控',content:'①开头3秒必须有钩子（冲突画面/悬念问题/反差镜头）②每个镜头不超过3秒（除非有对话或重点信息）③用跳剪加快节奏 ④BGM选择：日常类用lo-fi/轻音乐，减肥类用节奏感强的 ⑤转场技巧：匹配剪辑/动作连接/遮挡转场 ⑥字幕必加，很多用户静音刷视频。工具：剪映/CapCut。'},
+  {tag:'剪辑知识',title:'低成本拍摄设备清单',content:'入门级（0成本）：手机+自然光+三脚架。进阶（500元内）：手机+补光灯+领夹麦克风+手机稳定器。要点：①光线比设备重要，靠窗拍 ②收音比画质重要，买个百元领夹麦 ③稳定比运运重要，固定机位+剪辑切换 ④背景整洁比装修重要，一面白墙+一盆绿植就够。'},
+  {tag:'内容策略',title:'30天5条Vlog内容规划建议',content:'第1条：人设建立（我是谁+为什么记录）第2条：日常流程（一天的真实生活）第3条：挑战/对比（如失业后vs工作时的一天）第4条：干货分享（省钱/收纳/做饭技巧）第5条：月度总结+下月计划。每条1-3分钟即可，完播率比时长重要。'}
+];
+/* ========== 数据层 ========== */
+const STORE_KEY='creative_tracker_v1',ARCHIVE_KEY='creative_tracker_archive_v1';
+function getDefaultData(){return{
+  cycle:null,
+  novel:{title:'',outline:[],dailyData:{}},
+  short:{dailyData:{},writeTemplates:JSON.parse(JSON.stringify(SHORT_WRITE_DEFAULT)),learnTemplates:JSON.parse(JSON.stringify(SHORT_LEARN_DEFAULT)),lastWriteTemplates:null,lastLearnTemplates:null},
+  vlog:{dailyData:{},createTemplates:JSON.parse(JSON.stringify(VLOG_CREATE_DEFAULT)),learnTemplates:JSON.parse(JSON.stringify(VLOG_LEARN_DEFAULT)),lastCreateTemplates:null,lastLearnTemplates:null},
+  database:{entries:[]},
+  stats:{writeSessions:[]},
+  badges:{earned:[],crossEarned:[],cycleSnapshots:[]},
+  crossBadges:{earned:[]},
+  cycleRewards:[],
+  quotes:{custom:[],used:[]},
+  pet:{name:'墨墨',lastActive:Date.now(),totalWords:0},
+  dailySummary:{},dailyQuotes:{},lastVisitDate:null
+}}
+let DATA=loadData();
+function migrateData(){
+  const d=DATA;
+  if(!d.short)d.short={dailyData:{}};
+  if(!d.short.dailyData)d.short.dailyData={};
+  if(!d.short.writeTemplates)d.short.writeTemplates=JSON.parse(JSON.stringify(SHORT_WRITE_DEFAULT));
+  if(!d.short.learnTemplates)d.short.learnTemplates=JSON.parse(JSON.stringify(SHORT_LEARN_DEFAULT));
+  if(d.short.lastWriteTemplates===undefined)d.short.lastWriteTemplates=null;
+  if(d.short.lastLearnTemplates===undefined)d.short.lastLearnTemplates=null;
+  if(!d.vlog)d.vlog={dailyData:{}};
+  if(!d.vlog.dailyData)d.vlog.dailyData={};
+  if(!d.vlog.createTemplates)d.vlog.createTemplates=JSON.parse(JSON.stringify(VLOG_CREATE_DEFAULT));
+  if(!d.vlog.learnTemplates)d.vlog.learnTemplates=JSON.parse(JSON.stringify(VLOG_LEARN_DEFAULT));
+  if(d.vlog.lastCreateTemplates===undefined)d.vlog.lastCreateTemplates=null;
+  if(d.vlog.lastLearnTemplates===undefined)d.vlog.lastLearnTemplates=null;
+  if(!d.database)d.database={entries:[]};
+  if(!d.stats)d.stats={writeSessions:[]};
+  if(d.stats.writeSessions===undefined)d.stats.writeSessions=[];
+  if(!d.dailySummary)d.dailySummary={};
+  if(!d.pet)d.pet={name:'墨墨',lastActive:Date.now(),totalWords:0};
+  if(!d.badges)d.badges={earned:[]};
+  if(!d.badges.crossEarned)d.badges.crossEarned=[];
+  if(d.badges.cycleSnapshots===undefined)d.badges.cycleSnapshots=[];
+  if(!d.crossBadges)d.crossBadges={earned:[]};
+  if(!d.cycleRewards)d.cycleRewards=[];
+  if(!d.quotes)d.quotes={custom:[],used:[]};
+}
+migrateData();
+function loadData(){try{const raw=localStorage.getItem(STORE_KEY);if(!raw)return getDefaultData();return Object.assign(getDefaultData(),JSON.parse(raw))}catch(e){console.error('load fail',e);return getDefaultData()}}
+function saveData(){try{localStorage.setItem(STORE_KEY,JSON.stringify(DATA));DATA.pet.lastActive=Date.now();const n=new Date();const lst=document.getElementById('lastSaveTime');if(lst)lst.textContent=`保存于 ${n.getHours().toString().padStart(2,'0')}:${n.getMinutes().toString().padStart(2,'0')}`;updateStorageUsage()}catch(e){console.error('save fail',e);if(e.name==='QuotaExceededError'||e.code===22||e.code===1014){showStorageFullWarning()}else{showToast('保存失败：'+e.message,'warning')}}}
+function loadArchive(){try{return JSON.parse(localStorage.getItem(ARCHIVE_KEY)||'[]')}catch(e){return[]}}
+function saveArchive(a){try{localStorage.setItem(ARCHIVE_KEY,JSON.stringify(a));updateStorageUsage()}catch(e){console.error('archive save fail',e);if(e.name==='QuotaExceededError'||e.code===22||e.code===1014){showStorageFullWarning()}else{showToast('归档失败：'+e.message,'warning')}}}
+function getStorageSize(){let total=0;try{for(let key in localStorage){if(localStorage.hasOwnProperty(key)){total+=localStorage[key].length+key.length}}}catch(e){}return total}
+function getStorageLimit(){return 5*1024*1024}
+function updateStorageUsage(){const used=getStorageSize(),limit=getStorageLimit(),pct=Math.round(used/limit*100);const el=document.getElementById('storageUsage');if(el){let txt='存储 '+pct+'%';if(pct>80)txt='⚠️ '+txt;el.textContent=txt;el.style.color=pct>80?'var(--danger)':''}}
+function showStorageFullWarning(){showModal(`<h3 style="color:var(--danger)">⚠️ 存储空间已满</h3><p>浏览器本地存储空间不足，数据无法保存。请立即导出当前数据备份，然后清理旧归档释放空间。</p><div style="background:#FFF3F3;border:1px solid var(--danger);border-radius:8px;padding:10px;margin-bottom:14px;font-size:.82rem;color:var(--danger)">当前使用量已达上限，继续操作的数据可能无法保存。</div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">稍后处理</button><button class="btn" onclick="closeModal();exportData()">立即导出备份</button></div>`)}
+
+/* ========== 工具 ========== */
+function todayStr(){const d=new Date();return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`}
+function parseDateStr(s){const p=String(s).split('-').map(Number);return new Date(p[0],(p[1]||1)-1,p[2]||1)}
+function formatDate(cn){const d=new Date(cn);return `${d.getMonth()+1}月${d.getDate()}日`}
+function getCycleDayNum(){if(!DATA.cycle)return 0;const s=parseDateStr(DATA.cycle.startDate),t=parseDateStr(todayStr());return Math.floor((t-s)/86400000)+1}
+function getCurrentDayKey(){return 'day'+getCycleDayNum()}
+function formatDuration(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),ss=s%60;return h>0?`${h}:${m.toString().padStart(2,'0')}:${ss.toString().padStart(2,'0')}`:`${m.toString().padStart(2,'0')}:${ss.toString().padStart(2,'0')}`}
+function showToast(m,t=''){const el=document.getElementById('toast');el.textContent=m;el.className='toast show '+t;setTimeout(()=>el.classList.remove('show'),2800)}
+function showModal(h){document.getElementById('modalContent').innerHTML=h;document.getElementById('modalOverlay').classList.add('show')}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('show')}
+function escapeHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+document.getElementById('modalOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal()});
+
+/* ========== 金句（每日随机不重复） ========== */
+const QUOTES=[
+  {text:"写作是发现的旅程，你在文字中找到自己。",author:"——无题"},
+  {text:"每天写一点，积少成多，终成大作。",author:"——日积月累"},
+  {text:"灵感不会等懒惰的人，坐下来开始写吧。",author:"——行动派"},
+  {text:"完成比完美更重要，今天写完就是胜利。",author:"——效率哲学"},
+  {text:"你不需要很厉害才能开始，但你需要开始才能很厉害。",author:"——起点"},
+  {text:"写作是把灵魂倾注到纸上的过程。",author:"——创作之心"},
+  {text:"坚持30天，你会看到一个不一样的自己。",author:"——蜕变"},
+  {text:"好的故事不是写出来的，是改出来的。",author:"——修改之道"},
+  {text:"今天的3300字，是明天小说的基石。",author:"——日课"},
+  {text:"不要等待灵感，用行动召唤灵感。",author:"——行动召唤"},
+  {text:"每个伟大的作家，都曾是坐在桌前的新手。",author:"——起点"},
+  {text:"写作是最廉价的旅行，却能到达最远的地方。",author:"——文字之旅"},
+  {text:"你写的每个字都在塑造更好的自己。",author:"——自我雕刻"},
+  {text:"当想放弃时，想想当初为什么开始。",author:"——初心"},
+  {text:"今天的不适，是明天的舒适。",author:"——成长"},
+  {text:"写作是与自己的对话，也是与世界的对话。",author:"——对话"},
+  {text:"不积跬步无以至千里，不写每日无以成大作。",author:"——古训新解"},
+  {text:"你的故事只有你能写，开始吧。",author:"——唯一"},
+  {text:"拖延是创作的敌人，此刻就是最好的时机。",author:"——此刻"},
+  {text:"把梦想拆成每天的3300字，它就不再是梦。",author:"——拆解"},
+  {text:"创作的路上没有捷径，但每一步都算数。",author:"——步履"},
+  {text:"今天写下的文字，是未来读者的感动。",author:"——未来"},
+  {text:"写作不苦，苦的是不写作的空虚。",author:"——充实"},
+  {text:"把心交给文字，文字会还你一个世界。",author:"——交换"},
+  {text:"30天不长，但足以改变一个习惯。",author:"——习惯"},
+  {text:"每个爆款背后，都是无数个无人问津的日夜。",author:"——沉淀"},
+  {text:"你不写，故事就永远只在脑海里。",author:"——落地"},
+  {text:"让今天的努力，成为明天的底气。",author:"——底气"},
+  {text:"写作是孤独的，但文字让灵魂相连。",author:"——连接"},
+  {text:"不要怕写得不好，怕的是不写。",author:"——勇气"}
+];
+function getQuotePool(){return [...QUOTES, ...(DATA.quotes.custom||[])]}
+function getDailyQuote(){
+  const t=todayStr();
+  if(DATA.dailyQuotes[t])return DATA.dailyQuotes[t];
+  const pool=getQuotePool();
+  let used=DATA.quotes.used||[];
+  // 用过的不再出现，直至库耗尽再循环
+  let available=pool.filter((_,i)=>!used.includes(i));
+  if(available.length===0){used=[];available=pool}
+  // 按日期做伪随机
+  const seed=parseDateStr(t).getTime();
+  const idx=seed%available.length;
+  const q=available[idx];
+  const realIdx=pool.indexOf(q);
+  used.push(realIdx);
+  if(used.length>pool.length)used=used.slice(-pool.length);
+  DATA.quotes.used=used;
+  DATA.dailyQuotes[t]=q;
+  return q;
+}
+
+/* ========== 勋章 ========== */
+const BADGES=[
+  {id:'streak3',icon:'🌱',name:'初露锋芒',desc:'连续3天完成任务',type:'streak',threshold:3,scope:'cycle'},
+  {id:'streak7',icon:'🔥',name:'一周坚持',desc:'连续7天完成任务',type:'streak',threshold:7,scope:'cycle'},
+  {id:'streak10',icon:'⭐',name:'十天达人',desc:'连续10天完成任务',type:'streak',threshold:10,scope:'cycle'},
+  {id:'streak15',icon:'💎',name:'半月英雄',desc:'连续15天完成任务',type:'streak',threshold:15,scope:'cycle'},
+  {id:'streak21',icon:'👑',name:'习惯养成',desc:'连续21天完成任务',type:'streak',threshold:21,scope:'cycle'},
+  {id:'streak30',icon:'🏆',name:'满月王者',desc:'连续30天完成任务',type:'streak',threshold:30,scope:'cycle'},
+  {id:'task10',icon:'📌',name:'任务收集者',desc:'累计完成10个任务',type:'tasks',threshold:10,scope:'cycle'},
+  {id:'task30',icon:'📋',name:'任务达人',desc:'累计完成30个任务',type:'tasks',threshold:30,scope:'cycle'},
+  {id:'task50',icon:'🗂️',name:'任务大师',desc:'累计完成50个任务',type:'tasks',threshold:50,scope:'cycle'},
+  {id:'task100',icon:'🎖️',name:'百任务传说',desc:'累计完成100个任务',type:'tasks',threshold:100,scope:'cycle'},
+  {id:'words10',icon:'📝',name:'文字初心',desc:'达成10次日字数目标',type:'words',threshold:10,scope:'cycle'},
+  {id:'words30',icon:'✒️',name:'勤奋笔者',desc:'达成30次日字数目标',type:'words',threshold:30,scope:'cycle'},
+  {id:'words60',icon:'🖋️',name:'高产作家',desc:'达成60次日字数目标',type:'words',threshold:60,scope:'cycle'},
+  {id:'nightowl',icon:'🦉',name:'夜猫子',desc:'晚上10点后仍在学习',type:'special',scope:'cycle'},
+  {id:'earlybird',icon:'🐦',name:'早起鸟',desc:'早上7点前开始写作',type:'special',scope:'cycle'},
+  {id:'allday',icon:'🌟',name:'全能日',desc:'同一天完成长篇+短篇+Vlog',type:'special',scope:'cycle'},
+  {id:'speedwriter',icon:'⚡',name:'闪电手',desc:'单次写作速度超过50字/分钟',type:'special',scope:'cycle'},
+  {id:'marathon',icon:'🏃',name:'马拉松',desc:'单次写作超过60分钟',type:'special',scope:'cycle'}
+];
+/* 跨周期勋章（永久保存） */
+const CROSS_BADGES=[
+  {id:'cyc1',icon:'🎯',name:'初次启程',desc:'完成第1个30天周期',threshold:1,type:'cycles'},
+  {id:'cyc3',icon:'🌟',name:'三度坚持',desc:'完成3个30天周期',threshold:3,type:'cycles'},
+  {id:'cyc5',icon:'👑',name:'季度达人',desc:'完成5个30天周期',threshold:5,type:'cycles'},
+  {id:'cyc12',icon:'🏆',name:'年度王者',desc:'完成12个30天周期',threshold:12,type:'cycles'},
+  {id:'fullnovel',icon:'📚',name:'长篇满章',desc:'某周期长篇小说满章完成',type:'special'},
+  {id:'fullshort',icon:'✒️',name:'短篇满篇',desc:'某周期短篇小说3篇全完成',type:'special'},
+  {id:'fullvlog',icon:'🎬',name:'Vlog满条',desc:'某周期Vlog 5条全完成',type:'special'},
+  {id:'fullall',icon:'💎',name:'全能大满贯',desc:'某周期三大任务全部完成',type:'special'},
+  {id:'words100k',icon:'💯',name:'十万字里程碑',desc:'累计创作满10万字',threshold:100000,type:'words'},
+  {id:'words500k',icon:'🌠',name:'五十万字巨匠',desc:'累计创作满50万字',threshold:500000,type:'words'},
+  {id:'allbadges',icon:'🏅',name:'勋章全收集',desc:'某周期获得全部周期勋章',type:'special'}
+];
+function isDayCompleted(dk){
+  const nd=DATA.novel.dailyData[dk],sd=DATA.short.dailyData[dk],vd=DATA.vlog.dailyData[dk];
+  let n=false,s=false,v=false;
+  if(nd){n=(nd.tasks&&nd.tasks.some(t=>t))||(nd.customTasks&&nd.customTasks.some(t=>t.done))||(nd.words&&nd.words>=3300)}
+  if(sd){s=(sd.writeTasks&&sd.writeTasks.some(t=>t))||(sd.learnTasks&&sd.learnTasks.some(t=>t))}
+  if(vd){v=(vd.createTasks&&vd.createTasks.some(t=>t))||(vd.learnTasks&&vd.learnTasks.some(t=>t))}
+  return n||s||v;
+}
+function getStreakDays(){if(!DATA.cycle)return 0;let s=0;const start=parseDateStr(DATA.cycle.startDate),today=parseDateStr(todayStr());for(let d=today;d>=start;d=new Date(d.getTime()-86400000)){const dn=Math.floor((d-start)/86400000)+1;if(dn<1||dn>30)break;if(isDayCompleted('day'+dn))s++;else if(dn<getCycleDayNum())break}return s}
+function getTotalTasksCompleted(){let c=0;for(const dk in DATA.novel.dailyData){const d=DATA.novel.dailyData[dk];if(d.tasks)d.tasks.forEach(t=>{if(t)c++});if(d.customTasks)d.customTasks.forEach(t=>{if(t.done)c++})}for(const dk in DATA.short.dailyData){const d=DATA.short.dailyData[dk];if(d.learnTasks)d.learnTasks.forEach(t=>{if(t)c++});if(d.writeTasks)d.writeTasks.forEach(t=>{if(t)c++})}for(const dk in DATA.vlog.dailyData){const d=DATA.vlog.dailyData[dk];if(d.learnTasks)d.learnTasks.forEach(t=>{if(t)c++});if(d.createTasks)d.createTasks.forEach(t=>{if(t)c++})}return c}
+function getWordsGoalCount(){let c=0;for(const dk in DATA.novel.dailyData){const d=DATA.novel.dailyData[dk];if(d.words&&d.words>=3300)c++}return c}
+function checkBadges(){
+  const ne=[];const ei=DATA.badges.earned.map(b=>b.id);
+  const st=getStreakDays();BADGES.filter(b=>b.type==='streak').forEach(b=>{if(st>=b.threshold&&!ei.includes(b.id)){DATA.badges.earned.push({id:b.id,date:todayStr(),name:b.name});ne.push(b)}});
+  const tt=getTotalTasksCompleted();BADGES.filter(b=>b.type==='tasks').forEach(b=>{if(tt>=b.threshold&&!ei.includes(b.id)){DATA.badges.earned.push({id:b.id,date:todayStr(),name:b.name});ne.push(b)}});
+  const wg=getWordsGoalCount();BADGES.filter(b=>b.type==='words').forEach(b=>{if(wg>=b.threshold&&!ei.includes(b.id)){DATA.badges.earned.push({id:b.id,date:todayStr(),name:b.name});ne.push(b)}});
+  if(ne.length){saveData();ne.forEach(b=>showToast(`🎉 获得周期勋章：${b.name}！`,'success'))}
+  checkCrossBadges();
+}
+function checkSpecialBadge(type,data){
+  const ei=DATA.badges.earned.map(b=>b.id);let b=null;
+  if(type==='nightowl'){if(new Date().getHours()>=22&&!ei.includes('nightowl'))b=BADGES.find(x=>x.id==='nightowl')}
+  else if(type==='earlybird'){if(new Date().getHours()<7&&!ei.includes('earlybird'))b=BADGES.find(x=>x.id==='earlybird')}
+  else if(type==='speedwriter'){if(data&&data.speed>=50&&!ei.includes('speedwriter'))b=BADGES.find(x=>x.id==='speedwriter')}
+  else if(type==='marathon'){if(data&&data.duration>=3600&&!ei.includes('marathon'))b=BADGES.find(x=>x.id==='marathon')}
+  else if(type==='allday'){const dk=getCurrentDayKey();if(!ei.includes('allday')){const nd=DATA.novel.dailyData[dk],sd=DATA.short.dailyData[dk],vd=DATA.vlog.dailyData[dk];let n=nd&&((nd.tasks&&nd.tasks.some(t=>t))||(nd.customTasks&&nd.customTasks.some(t=>t.done))||(nd.words>=3300));let s=sd&&((sd.learnTasks&&sd.learnTasks.some(t=>t))||(sd.writeTasks&&sd.writeTasks.some(t=>t)));let v=vd&&((vd.learnTasks&&vd.learnTasks.some(t=>t))||(vd.createTasks&&vd.createTasks.some(t=>t)));if(n&&s&&v)b=BADGES.find(x=>x.id==='allday')}}
+  if(b){DATA.badges.earned.push({id:b.id,date:todayStr(),name:b.name});saveData();showToast(`🎉 获得周期勋章：${b.name}！`,'success')}
+  checkCrossBadges();
+}
+function getCyclesCompleted(){return loadArchive().filter(a=>a.cycle).length}
+function getTotalWordsAllTime(){return DATA.stats.writeSessions.reduce((a,b)=>a+(b.words||0),0)}
+function checkCrossBadges(){
+  const ce=DATA.crossBadges.earned||[];const ei=ce.map(b=>b.id);const ne=[];
+  const cyc=getCyclesCompleted();
+  CROSS_BADGES.filter(b=>b.type==='cycles').forEach(b=>{if(cyc>=b.threshold&&!ei.includes(b.id)){ce.push({id:b.id,date:todayStr(),name:b.name});ne.push(b)}});
+  const tw=getTotalWordsAllTime();
+  CROSS_BADGES.filter(b=>b.type==='words').forEach(b=>{if(tw>=b.threshold&&!ei.includes(b.id)){ce.push({id:b.id,date:todayStr(),name:b.name});ne.push(b)}});
+  if(ne.length){DATA.crossBadges.earned=ce;saveData();ne.forEach(b=>showToast(`🌟 获得跨周期勋章：${b.name}！`,'success'))}
+}
+
+/* ========== 宠物（按累计字数升级） ========== */
+function getPetState(){const diff=Date.now()-DATA.pet.lastActive;if(diff<5*60*1000)return{emoji:'🐱',mood:'饱满',moodPct:100,color:'#00B894',sleeping:false,text:'精神饱满，状态极佳！正陪着你创作呢~'};if(diff<30*60*1000)return{emoji:'😺',mood:'愉快',moodPct:75,color:'#55CE8A',sleeping:false,text:'心情不错，随时准备开工~'};if(diff<2*60*60*1000)return{emoji:'😐',mood:'一般',moodPct:50,color:'#FDCB6E',sleeping:false,text:'有点无聊了，来写点东西吧~'};if(diff<6*60*60*1000)return{emoji:'😪',mood:'饥饿',moodPct:25,color:'#FF7675',sleeping:false,text:'肚子饿了... 快来喂喂我吧！'};return{emoji:'😴',mood:'沉睡',moodPct:10,color:'#B2BEC3',sleeping:true,text:'太久没来了，我已经睡着了... 轻轻唤醒我吧~'}}
+function getPetLevelInfo(){const total=getTotalWordsAllTime();const PER=10000;const level=Math.floor(total/PER)+1;const cur=total%PER;const pct=Math.round(cur/PER*100);const need=PER-cur;return {level,total,cur,need,pct,PER}}
+function updatePetActivity(){DATA.pet.lastActive=Date.now()}
+
+/* ========== 路由 ========== */
+let currentPage='progress';
+function navigateTo(p){currentPage=p;document.querySelectorAll('.sidebar-nav li a').forEach(a=>a.classList.toggle('active',a.dataset.page===p));const titles={progress:'计划进度',novel:'长篇小说',short:'短篇小说',vlog:'Vlog',database:'学习归纳数据库'};document.getElementById('topbarTitle').textContent=titles[p]||p;document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('show');renderPage(p)}
+document.querySelectorAll('.sidebar-nav li a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();navigateTo(a.dataset.page)}));
+document.getElementById('menuBtn').addEventListener('click',()=>{document.getElementById('sidebar').classList.add('open');document.getElementById('sidebarOverlay').classList.add('show')});
+document.getElementById('sidebarOverlay').addEventListener('click',()=>{document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('show')});
+function renderPage(p){const c=document.getElementById('pageContainer');c.innerHTML='';({progress:renderProgressPage,novel:renderNovelPage,short:renderShortPage,vlog:renderVlogPage,database:renderDatabasePage}[p]||renderProgressPage)(c)}
+
+/* ========== 备注提醒 ========== */
+function prevNoteReminder(type,day){if(day<=1)return '';const prevDk='day'+(day-1);let prev=null;if(type==='novel')prev=DATA.novel.dailyData[prevDk];else if(type==='short')prev=DATA.short.dailyData[prevDk];else prev=DATA.vlog.dailyData[prevDk];if(prev&&prev.note&&prev.note.trim())return `<div class="reminder-banner"><strong>📌 昨日备注提醒（Day ${day-1}）</strong><br>${escapeHtml(prev.note)}</div>`;return ''}
+
+/* ========== 提前完成检测 ========== */
+function isMainTaskDone(type){
+  if(type==='novel'){const np=calcNovelProgress();return np.total>0&&np.done>=np.total}
+  if(type==='short'){return calcShortProgress().done>=3}
+  if(type==='vlog'){return calcVlogProgress().done>=5}
+  return false;
+}
+function checkEarlyCompletion(){
+  if(!DATA.cycle)return;
+  if(DATA.cycle.completionPrompted)return;
+  const n=isMainTaskDone('novel'),s=isMainTaskDone('short'),v=isMainTaskDone('vlog');
+  // 三项都完成 或 当前周期天数已到30且至少完成一项
+  const cd=getCycleDayNum();
+  if((n&&s&&v)||(cd>=30&&(n||s||v))){
+    DATA.cycle.completionPrompted=true;saveData();
+    showCycleCompletionModal(n,s,v);
+  }
+}
+function showCycleCompletionModal(n,s,v){
+  const np=calcNovelProgress(),sp=calcShortProgress(),vp=calcVlogProgress();
+  const tw=getTotalWordsAllTime();
+  const cyc=getCyclesCompleted()+1;
+  showModal(`<h3>🎉 恭喜！30天周期任务完成！</h3>
+  <p>这是你的第 <strong>${cyc}</strong> 个30天周期。以下是本次周期总结：</p>
+  <div style="background:#F7F8FC;border-radius:8px;padding:14px;margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>📖 长篇小说</span><strong>${np.done}/${np.total} 章 ${n?'✅':'❌'}</strong></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>✍️ 短篇小说</span><strong>${sp.done}/3 篇 ${s?'✅':'❌'}</strong></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>🎬 Vlog</span><strong>${vp.done}/5 条 ${v?'✅':'❌'}</strong></div>
+    <div style="display:flex;justify-content:space-between;margin-top:8px;border-top:1px solid var(--border);padding-top:8px"><span>累计创作字数</span><strong>${tw} 字</strong></div>
+    <div style="display:flex;justify-content:space-between;margin-top:4px"><span>本周期获得勋章</span><strong>${DATA.badges.earned.length} 枚</strong></div>
+    <div style="display:flex;justify-content:space-between;margin-top:4px"><span>跨周期勋章</span><strong>${(DATA.crossBadges.earned||[]).length} 枚</strong></div>
+  </div>
+  ${n&&s&&v?'<div class="carryover-banner"><strong>🌟 大满贯！</strong>三大任务全部完成！</div>':''}
+  <p>是否立即归档并开启新周期？归档时未完成项会自动延续到新周期。</p>
+  <div class="modal-actions">
+    <button class="btn btn-outline" onclick="closeModal()">稍后再说</button>
+    <button class="btn" onclick="closeModal();archiveCycle(true)">归档并开启新周期</button>
+  </div>`);
+}
+
+/* ========== 页面1：计划进度 ========== */
+function renderProgressPage(c){
+  if(!DATA.cycle){renderNoCycleState(c);return}
+  const cd=getCycleDayNum(),pet=getPetState(),q=getDailyQuote(),pl=getPetLevelInfo();
+  const b=document.createElement('div');b.className='cycle-banner fade-in';
+  b.innerHTML=`<div><div style="font-size:.75rem;opacity:.85">当前周期</div><strong>${DATA.cycle.title||'30天创作计划'}</strong><div class="cb-info">起始日：${formatDate(DATA.cycle.startDate)} · 已过 ${Math.min(cd,30)} / 30 天</div></div><div style="text-align:center"><div class="cb-day-num">${Math.min(cd,30)}</div><div style="font-size:.75rem;opacity:.85">Day ${Math.min(cd,30)}</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center"><button class="btn btn-sm btn-outline" style="background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.4)" onclick="archiveCycle(false)">归档并开启新周期</button></div>`;
+  c.appendChild(b);
+  const qb=document.createElement('div');qb.className='daily-quote fade-in';qb.innerHTML=`<div class="quote-text">${q.text}</div><div class="quote-author">${q.author}</div>`;c.appendChild(qb);
+  const pb=document.createElement('div');pb.className='pet-area fade-in';pb.innerHTML=`<div class="pet-emoji ${pet.sleeping?'sleeping':''}">${pet.emoji}</div><div class="pet-info"><div class="pet-name">${escapeHtml(DATA.pet.name)}<span class="level-badge">Lv.${pl.level}</span><button class="pet-edit-btn" onclick="renamePet()">✏️</button></div><div class="pet-status-text">${pet.text}</div><div class="pet-mood-bar"><div class="pet-mood-fill" style="width:${pl.pct}%;background:${pet.color}"></div></div><div class="pet-level-info">累计创作 <b>${pl.total}</b> 字 · 距 Lv.${pl.level+1} 还需 <b>${pl.need}</b> 字</div></div>`;c.appendChild(pb);
+  const pg=document.createElement('div');pg.className='progress-grid fade-in';
+  const np=calcNovelProgress(),sp=calcShortProgress(),vp=calcVlogProgress();
+  pg.innerHTML=`<div class="progress-card"><div class="pc-icon">📖</div><div class="pc-title">长篇小说</div><div class="pc-value">${np.done}/${np.total}</div><div style="font-size:.7rem;color:var(--text-light)">已完成章节</div><div class="progress-bar"><div class="pb-fill" style="width:${np.pct}%;background:#6C5CE7"></div></div></div><div class="progress-card"><div class="pc-icon">✍️</div><div class="pc-title">短篇小说</div><div class="pc-value">${sp.done}/${sp.total}</div><div style="font-size:.7rem;color:var(--text-light)">完成篇数</div><div class="progress-bar"><div class="pb-fill" style="width:${sp.pct}%;background:#00CEC9"></div></div></div><div class="progress-card"><div class="pc-icon">🎬</div><div class="pc-title">Vlog</div><div class="pc-value">${vp.done}/${vp.total}</div><div style="font-size:.7rem;color:var(--text-light)">完成视频</div><div class="progress-bar"><div class="pb-fill" style="width:${vp.pct}%;background:#FDCB6E"></div></div></div>`;
+  c.appendChild(pg);
+  // 勋章墙（周期 + 跨周期）
+  const bc=document.createElement('div');bc.className='card fade-in';
+  let bh=`<div class="card-title">🎖️ 勋章墙 <span class="badge">周期 ${DATA.badges.earned.length}/${BADGES.length}</span> <span class="badge" style="background:linear-gradient(135deg,#FDCB6E,#E17055)">跨周期 ${(DATA.crossBadges.earned||[]).length}/${CROSS_BADGES.length}</span></div>`;
+  bh+=`<div style="font-size:.78rem;font-weight:600;margin-bottom:6px;color:var(--text-light)">本周期勋章（新周期清零）</div><div class="badge-wall">`;
+  BADGES.forEach(b=>{const e=DATA.badges.earned.find(eb=>eb.id===b.id);bh+=`<div class="badge-item ${e?'earned':'locked'}"><div class="b-icon">${b.icon}</div><div class="b-name">${b.name}</div><div class="b-desc">${b.desc}</div></div>`});
+  bh+=`</div><div style="font-size:.78rem;font-weight:600;margin:12px 0 6px;color:var(--text-light)">跨周期勋章（永久保存）</div><div class="badge-wall">`;
+  CROSS_BADGES.forEach(b=>{const e=(DATA.crossBadges.earned||[]).find(eb=>eb.id===b.id);bh+=`<div class="badge-item ${e?'earned':'locked'}"><div class="b-icon">${b.icon}</div><div class="b-name">${b.name}</div><div class="b-desc">${b.desc}</div></div>`});
+  bh+='</div>';bc.innerHTML=bh;c.appendChild(bc);
+  // 每日总结
+  const t=todayStr(),sc=document.createElement('div');sc.className='card fade-in';
+  sc.innerHTML=`<div class="card-title">📝 每日总结</div><textarea id="dailySummaryInput" placeholder="今天完成了什么？有什么感悟？遇到了什么困难？明天计划怎么改进？" style="min-height:100px">${DATA.dailySummary[t]||''}</textarea><div style="margin-top:10px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap"><button class="btn btn-sm btn-outline" onclick="saveDailySummary(true)">保存到学习库</button><button class="btn btn-sm" onclick="saveDailySummary(false)">仅保存</button></div>`;
+  c.appendChild(sc);
+  updatePetActivity();
+  checkEarlyCompletion();
+}
+function renderNoCycleState(c){
+  const e=document.createElement('div');e.className='card fade-in';e.innerHTML=`<div class="empty-state"><div class="es-icon">🚀</div><div class="es-text" style="margin-bottom:20px">还没有开启30天周期<br>开启你的创作追踪之旅吧！</div><button class="btn btn-lg" onclick="showNewCycleModal()">开启新周期</button></div><div class="guide-section"><strong>📱 工作台功能一览：</strong><br>📊 <strong>计划进度</strong> — 查看整体完成度、宠物状态、每日金句和勋章墙<br>📖 <strong>长篇小说</strong> — 30天大纲追踪，每日字数/任务/计时器，未完成自动顺延<br>✍️ <strong>短篇小说</strong> — 30天写3篇（10天一篇），含拆解模板<br>🎬 <strong>Vlog</strong> — 30天做5条（6天一条），含对标账号分析<br>📚 <strong>学习归纳数据库</strong> — 写作数据统计 / 学习归纳库 / 每日总结<br><br>💡 <strong>数据安全</strong>：学习库与统计跨周期永久累积；建议定期用侧边栏底部的「导出备份」或「库备份」保存</div>`;c.appendChild(e);
+  const bc=document.createElement('div');bc.className='card fade-in';
+  let bh=`<div class="card-title">🎖️ 勋章墙 <span class="badge">周期 ${DATA.badges.earned.length}/${BADGES.length}</span> <span class="badge" style="background:linear-gradient(135deg,#FDCB6E,#E17055)">跨周期 ${(DATA.crossBadges.earned||[]).length}/${CROSS_BADGES.length}</span></div>`;
+  bh+=`<div style="font-size:.78rem;font-weight:600;margin-bottom:6px;color:var(--text-light)">本周期勋章（新周期清零）</div><div class="badge-wall">`;
+  BADGES.forEach(b=>{const e=DATA.badges.earned.find(eb=>eb.id===b.id);bh+=`<div class="badge-item ${e?'earned':'locked'}"><div class="b-icon">${b.icon}</div><div class="b-name">${b.name}</div><div class="b-desc">${b.desc}</div></div>`});
+  bh+=`</div><div style="font-size:.78rem;font-weight:600;margin:12px 0 6px;color:var(--text-light)">跨周期勋章（永久保存）</div><div class="badge-wall">`;
+  CROSS_BADGES.forEach(b=>{const e=(DATA.crossBadges.earned||[]).find(eb=>eb.id===b.id);bh+=`<div class="badge-item ${e?'earned':'locked'}"><div class="b-icon">${b.icon}</div><div class="b-name">${b.name}</div><div class="b-desc">${b.desc}</div></div>`});
+  bh+='</div>';bc.innerHTML=bh;c.appendChild(bc);
+}
+
+/* ========== 开启新周期（含模板选择） ========== */
+function showNewCycleModal(){showModal(`<h3>开启新的30天周期</h3>
+<p>填写信息并粘贴小说大纲，系统将自动生成30天计划。<br><span style="color:var(--danger)">提示：学习归纳库与写作统计跨周期永久累积；归档时未完成任务会自动延续到新周期。</span></p>
+<div style="margin-bottom:14px"><label style="font-size:.85rem;display:block;margin-bottom:6px">周期标题</label><input type="text" id="cycleTitleInput" placeholder="30天创作计划"></div>
+<div style="margin-bottom:14px"><label style="font-size:.85rem;display:block;margin-bottom:6px">整体计划/目标（可选）</label><input type="text" id="cyclePlanInput" placeholder="这个周期的整体目标是什么？"></div>
+<div style="margin-bottom:14px"><label style="font-size:.85rem;display:block;margin-bottom:6px">起始日期</label><input type="date" id="cycleDateInput" value="${todayStr()}"></div>
+<div style="margin-bottom:14px"><label style="font-size:.85rem;display:block;margin-bottom:6px">小说标题</label><input type="text" id="novelTitleInput" placeholder="输入小说标题"></div>
+<div style="margin-bottom:10px"><label style="font-size:.85rem;display:block;margin-bottom:6px">📖 小说大纲（粘贴你的大纲，系统自动分配到30天）</label>
+<div style="display:flex;gap:6px;margin-bottom:8px"><button class="btn btn-sm btn-outline outline-mode-btn active" id="modeFreeBtn" onclick="switchOutlineMode('free')">📝 自由文本</button><button class="btn btn-sm btn-outline outline-mode-btn" id="modeExactBtn" onclick="switchOutlineMode('exact')">📋 精确格式</button></div>
+<div id="freeInputArea"><textarea id="outlineFreeInput" placeholder="直接粘贴你的小说大纲，用空行分段。&#10;&#10;例如：&#10;第一章 故事开始——主角的日常介绍，触发事件出现。&#10;&#10;第二章 冲突升级——主角面对第一个挑战，遇到关键人物。&#10;&#10;...（继续写完所有章节）&#10;&#10;💡 系统会自动按段落分到30天，不足30天则后面的天数为空。" style="min-height:120px;font-size:.85rem"></textarea></div>
+<div id="exactInputArea" style="display:none"><textarea id="outlineExactInput" placeholder="每行一个章节，用 | 分隔：&#10;1|第一章 觉醒|描述|任务1;任务2|3300&#10;2|第二章 系统降临|描述|任务1;任务2|3300" style="min-height:120px;font-size:.82rem;font-family:monospace"></textarea></div>
+</div>
+<div style="margin:14px 0">
+  <label style="font-size:.85rem;display:block;margin-bottom:6px">✍️ 短篇小说 · 本轮模板</label>
+  <div class="db-filter" style="margin-bottom:8px">
+    <button class="filter-btn active" id="shortTplPreset" onclick="selTpl('short','preset')">预设（默认）</button>
+    <button class="filter-btn" id="shortTplNew" onclick="selTpl('short','new')">添加新模板</button>
+    <button class="filter-btn" id="shortTplLast" onclick="selTpl('short','last')">沿用上次</button>
+  </div>
+  <div id="shortTplNewArea" style="display:none">
+    <div style="font-size:.75rem;color:var(--text-light);margin-bottom:4px">写作任务（每行=一天，分号分隔任务，共10行）</div>
+    <textarea id="shortWriteNew" style="min-height:80px;font-size:.8rem" placeholder="第1天任务1;任务2;任务3&#10;第2天任务1;任务2&#10;...(共10行)"></textarea>
+    <div style="font-size:.75rem;color:var(--text-light);margin:8px 0 4px">学习内容（每行：标签|标题|内容）</div>
+    <textarea id="shortLearnNew" style="min-height:80px;font-size:.8rem" placeholder="结构拆解|三幕剧模板|内容..."></textarea>
+  </div>
+  <div id="shortTplLastInfo" class="template-mode-note">将使用系统默认短篇小说模板。</div>
+</div>
+<div style="margin:14px 0">
+  <label style="font-size:.85rem;display:block;margin-bottom:6px">🎬 Vlog · 本轮模板</label>
+  <div class="db-filter" style="margin-bottom:8px">
+    <button class="filter-btn active" id="vlogTplPreset" onclick="selTpl('vlog','preset')">预设（默认）</button>
+    <button class="filter-btn" id="vlogTplNew" onclick="selTpl('vlog','new')">添加新模板</button>
+    <button class="filter-btn" id="vlogTplLast" onclick="selTpl('vlog','last')">沿用上次</button>
+  </div>
+  <div id="vlogTplNewArea" style="display:none">
+    <div style="font-size:.75rem;color:var(--text-light);margin-bottom:4px">创作任务（每行=一天，分号分隔任务，共6行）</div>
+    <textarea id="vlogCreateNew" style="min-height:70px;font-size:.8rem" placeholder="第1天任务1;任务2;任务3&#10;...(共6行)"></textarea>
+    <div style="font-size:.75rem;color:var(--text-light);margin:8px 0 4px">学习内容（每行：标签|标题|内容）</div>
+    <textarea id="vlogLearnNew" style="min-height:70px;font-size:.8rem" placeholder="对标账号|北漂题材|内容..."></textarea>
+  </div>
+  <div id="vlogTplLastInfo" class="template-mode-note">将使用系统默认 Vlog 模板。</div>
+</div>
+<div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn" onclick="startNewCycle()">开启周期</button></div>`);
+  setTimeout(()=>{const inp=document.getElementById('cycleTitleInput');if(inp)inp.focus()},100)}
+let outlineInputMode='free',tplChoice={short:'preset',vlog:'preset'};
+function selTpl(type,mode){
+  tplChoice[type]=mode;
+  document.getElementById(type+'TplPreset').classList.toggle('active',mode==='preset');
+  document.getElementById(type+'TplNew').classList.toggle('active',mode==='new');
+  document.getElementById(type+'TplLast').classList.toggle('active',mode==='last');
+  document.getElementById(type+'TplNewArea').style.display=mode==='new'?'block':'none';
+  const info=document.getElementById(type+'TplLastInfo');const label=type==='short'?'短篇小说':'Vlog';
+  if(mode==='preset')info.textContent='将使用系统默认'+label+'模板。';
+  else if(mode==='new')info.textContent='将使用你填写的新模板（覆盖默认）。';
+  else{const hasLast=type==='short'?(DATA.short.lastWriteTemplates):(DATA.vlog.lastCreateTemplates);info.textContent=hasLast?'将沿用上一轮'+label+'的模板。':'（暂无上一轮记录，将退回默认模板）';}
+}
+function switchOutlineMode(mode){outlineInputMode=mode;document.getElementById('freeInputArea').style.display=mode==='free'?'block':'none';document.getElementById('exactInputArea').style.display=mode==='exact'?'block':'none';document.getElementById('modeFreeBtn').classList.toggle('active',mode==='free');document.getElementById('modeExactBtn').classList.toggle('active',mode==='exact')}
+function parseFreeOutline(text){const blocks=text.split(/\n\s*\n/).map(b=>b.trim()).filter(b=>b);const outline=[];const dayCount=Math.min(blocks.length,30);for(let i=0;i<dayCount;i++){const block=blocks[i];let title=block,desc='',tasks=[];const flb=block.indexOf('\n');if(flb>0){title=block.substring(0,flb).trim();desc=block.substring(flb+1).trim()}if(!title)title='第'+(i+1)+'章';if(desc){const s=desc.split(/[。；;\n]/).map(x=>x.trim()).filter(x=>x.length>2);tasks=s.slice(0,5)}else tasks=['完成第'+(i+1)+'章写作'];if(!tasks.length)tasks=['完成第'+(i+1)+'章写作'];outline.push({day:i+1,chapterTitle:title,chapterDesc:desc||title,tasks,minWords:3300})}return outline}
+function parseExactOutline(raw){const lines=raw.split('\n').filter(l=>l.trim());const outline=[];for(const line of lines){const parts=line.split('|').map(p=>p.trim());if(parts.length<4){showToast('格式错误，每行至少4个字段','warning');return null}const day=parseInt(parts[0]);if(!day||day<1||day>30){showToast('天数必须1-30','warning');return null}const tasks=parts[3].split(';').map(t=>t.trim()).filter(t=>t);const minWords=parts[4]?parseInt(parts[4])||3300:3300;outline.push({day,chapterTitle:parts[1],chapterDesc:parts[2],tasks,minWords})}if(outline.length)outline.sort((a,b)=>a.day-b.day);return outline}
+function parseShortWriteNew(text){const lines=text.split('\n').map(l=>l.trim()).filter(l=>l);if(!lines.length)return null;const arr=[];for(let i=0;i<10;i++){const line=lines[i]||'';const tasks=line.split(';').map(t=>t.trim()).filter(t=>t);arr.push({day:i+1,tasks:tasks.length?tasks:['完成第'+(i+1)+'天写作']})}return arr}
+function parseVlogCreateNew(text){const lines=text.split('\n').map(l=>l.trim()).filter(l=>l);if(!lines.length)return null;const arr=[];for(let i=0;i<6;i++){const line=lines[i]||'';const tasks=line.split(';').map(t=>t.trim()).filter(t=>t);arr.push({day:i+1,tasks:tasks.length?tasks:['完成第'+(i+1)+'天创作']})}return arr}
+function parseLearnNew(text){const lines=text.split('\n').map(l=>l.trim()).filter(l=>l);if(!lines.length)return null;const arr=[];for(const line of lines){const parts=line.split('|').map(p=>p.trim());if(parts.length<3)continue;arr.push({tag:parts[0]||'未分类',title:parts[1]||'无标题',content:parts[2]||''})}return arr.length?arr:null}
+function startNewCycle(){
+  const title=document.getElementById('cycleTitleInput').value.trim()||'30天创作计划';
+  const plan=document.getElementById('cyclePlanInput').value.trim();
+  const startDate=document.getElementById('cycleDateInput').value||todayStr();
+  const novelTitle=document.getElementById('novelTitleInput').value.trim();
+  // 模板：先快照当前为"上次"
+  DATA.short.lastWriteTemplates=JSON.parse(JSON.stringify(DATA.short.writeTemplates));
+  DATA.short.lastLearnTemplates=JSON.parse(JSON.stringify(DATA.short.learnTemplates));
+  DATA.vlog.lastCreateTemplates=JSON.parse(JSON.stringify(DATA.vlog.createTemplates));
+  DATA.vlog.lastLearnTemplates=JSON.parse(JSON.stringify(DATA.vlog.learnTemplates));
+  if(tplChoice.short==='new'){const wt=parseShortWriteNew(document.getElementById('shortWriteNew').value);const lt=parseLearnNew(document.getElementById('shortLearnNew').value);if(wt)DATA.short.writeTemplates=wt;if(lt)DATA.short.learnTemplates=lt}
+  else if(tplChoice.short==='last'){if(DATA.short.lastWriteTemplates)DATA.short.writeTemplates=JSON.parse(JSON.stringify(DATA.short.lastWriteTemplates));if(DATA.short.lastLearnTemplates)DATA.short.learnTemplates=JSON.parse(JSON.stringify(DATA.short.lastLearnTemplates))}
+  else{DATA.short.writeTemplates=JSON.parse(JSON.stringify(SHORT_WRITE_DEFAULT));DATA.short.learnTemplates=JSON.parse(JSON.stringify(SHORT_LEARN_DEFAULT))}
+  if(tplChoice.vlog==='new'){const ct=parseVlogCreateNew(document.getElementById('vlogCreateNew').value);const lt=parseLearnNew(document.getElementById('vlogLearnNew').value);if(ct)DATA.vlog.createTemplates=ct;if(lt)DATA.vlog.learnTemplates=lt}
+  else if(tplChoice.vlog==='last'){if(DATA.vlog.lastCreateTemplates)DATA.vlog.createTemplates=JSON.parse(JSON.stringify(DATA.vlog.lastCreateTemplates));if(DATA.vlog.lastLearnTemplates)DATA.vlog.learnTemplates=JSON.parse(JSON.stringify(DATA.vlog.lastLearnTemplates))}
+  else{DATA.vlog.createTemplates=JSON.parse(JSON.stringify(VLOG_CREATE_DEFAULT));DATA.vlog.learnTemplates=JSON.parse(JSON.stringify(VLOG_LEARN_DEFAULT))}
+  // 归档当前周期（若有）—— 未完成项自动延续
+  let carryover=null;
+  if(DATA.cycle){
+    const a=loadArchive();
+    a.push({archiveDate:todayStr(),cycle:JSON.parse(JSON.stringify(DATA.cycle)),novel:JSON.parse(JSON.stringify(DATA.novel)),short:JSON.parse(JSON.stringify(DATA.short)),vlog:JSON.parse(JSON.stringify(DATA.vlog)),database:JSON.parse(JSON.stringify(DATA.database)),stats:JSON.parse(JSON.stringify(DATA.stats)),badges:JSON.parse(JSON.stringify(DATA.badges)),dailySummary:JSON.parse(JSON.stringify(DATA.dailySummary))});
+    saveArchive(a);
+    // 计算未完成延续项
+    carryover=computeCarryover();
+    // 周期结束评价
+    recordCycleReward();
+    // 周期内勋章清零（跨周期保留）
+    DATA.badges.earned=[];DATA.badges.cycleSnapshots=DATA.badges.cycleSnapshots||[];
+    checkCrossBadges();
+  }
+  DATA.cycle={startDate,dayCount:30,title,plan,completionPrompted:false};
+  DATA.novel.dailyData={};DATA.short.dailyData={};DATA.vlog.dailyData={};
+  DATA.dailySummary={};DATA.dailyQuotes={};DATA.lastCarryProcessDate=null;
+  if(novelTitle)DATA.novel.title=novelTitle;
+  for(let i=1;i<=30;i++){const dk='day'+i;DATA.novel.dailyData[dk]={tasks:[],customTasks:[],words:0,timerSec:0,note:'',carryWords:0,carryTasks:[]};DATA.short.dailyData[dk]={learnTasks:[],writeTasks:[],words:0,timerSec:0,note:''};DATA.vlog.dailyData[dk]={learnTasks:[],createTasks:[],note:''}}
+  // 应用未完成延续
+  if(carryover)applyCarryover(carryover);
+  // 大纲
+  let outlineLoaded=false;
+  if(outlineInputMode==='free'){const raw=document.getElementById('outlineFreeInput').value.trim();if(raw){const p=parseFreeOutline(raw);if(p.length){DATA.novel.outline=p;outlineLoaded=true}}}
+  else if(outlineInputMode==='exact'){const raw=document.getElementById('outlineExactInput').value.trim();if(raw){const p=parseExactOutline(raw);if(p&&p.length){DATA.novel.outline=p;outlineLoaded=true}}}
+  saveData();closeModal();
+  if(outlineLoaded)showToast(`周期已开启！大纲已加载 ${DATA.novel.outline.length} 章 💪`,'success');
+  else showToast('周期已开启！可去"长篇小说"导入大纲','success');
+  renderPage('progress');updateSidebarCycleInfo();
+}
+/* 计算未完成延续项 */
+function computeCarryover(){
+  const co={novelCarryTasks:[],novelCarryWords:0,shortIncomplete:[],vlogIncomplete:[]};
+  if(!DATA.cycle)return co;
+  const today=getCycleDayNum();
+  for(let d=1;d<=30;d++){
+    const dk='day'+d;
+    const nd=DATA.novel.dailyData[dk];
+    if(nd){
+      const outline=DATA.novel.outline.find(o=>o.day===d);
+      if(outline&&outline.tasks.length){outline.tasks.forEach((t,i)=>{if(!nd.tasks[i]&&i<nd.tasks.length)co.novelCarryTasks.push({day:d,text:t})})}
+      if(nd.customTasks)nd.customTasks.forEach(t=>{if(!t.done)co.novelCarryTasks.push({day:d,text:t.text})});
+      const minW=outline?(outline.minWords||3300):3300;
+      if(nd.words<minW)co.novelCarryWords+=(minW-nd.words);
+    }
+    // 短篇：未完成的篇目（10天一轮）
+    const sd=DATA.short.dailyData[dk];
+    if(sd&&!isShortDayDone(d))co.shortIncomplete.push(d);
+    const vd=DATA.vlog.dailyData[dk];
+    if(vd&&!isVlogDayDone(d))co.vlogIncomplete.push(d);
+  }
+  return co;
+}
+function isShortDayDone(d){const sd=DATA.short.dailyData['day'+d];if(!sd)return false;return (sd.writeTasks&&sd.writeTasks.some(t=>t))||(sd.learnTasks&&sd.learnTasks.some(t=>t))}
+function isVlogDayDone(d){const vd=DATA.vlog.dailyData['day'+d];if(!vd)return false;return (vd.createTasks&&vd.createTasks.some(t=>t))||(vd.learnTasks&&vd.learnTasks.some(t=>t))}
+function applyCarryover(co){
+  if(co.novelCarryWords>0&&DATA.novel.dailyData['day1'])DATA.novel.dailyData['day1'].carryWords=(DATA.novel.dailyData['day1'].carryWords||0)+co.novelCarryWords;
+  if(co.novelCarryTasks.length&&DATA.novel.dailyData['day1']){DATA.novel.dailyData['day1'].carryTasks=[...(DATA.novel.dailyData['day1'].carryTasks||[]),...co.novelCarryTasks.map(x=>({text:x.text,done:false}))]}
+}
+function recordCycleReward(){
+  const np=calcNovelProgress(),sp=calcShortProgress(),vp=calcVlogProgress();
+  const reward={date:todayStr(),cycleTitle:DATA.cycle?DATA.cycle.title:'',novelDone:np.done,novelTotal:np.total,shortDone:sp.done,vlogDone:vp.done,totalWords:getTotalWordsAllTime(),badgesEarned:DATA.badges.earned.length,allDone:np.done>=np.total&&sp.done>=3&&vp.done>=5};
+  DATA.cycleRewards=DATA.cycleRewards||[];DATA.cycleRewards.push(reward);
+  // 跨周期特殊勋章
+  const ce=DATA.crossBadges.earned||[];const ei=ce.map(b=>b.id);const ne=[];
+  if(np.done>=np.total&&!ei.includes('fullnovel')){ce.push({id:'fullnovel',date:todayStr()});ne.push(CROSS_BADGES.find(b=>b.id==='fullnovel'))}
+  if(sp.done>=3&&!ei.includes('fullshort')){ce.push({id:'fullshort',date:todayStr()});ne.push(CROSS_BADGES.find(b=>b.id==='fullshort'))}
+  if(vp.done>=5&&!ei.includes('fullvlog')){ce.push({id:'fullvlog',date:todayStr()});ne.push(CROSS_BADGES.find(b=>b.id==='fullvlog'))}
+  if(np.done>=np.total&&sp.done>=3&&vp.done>=5&&!ei.includes('fullall')){ce.push({id:'fullall',date:todayStr()});ne.push(CROSS_BADGES.find(b=>b.id==='fullall'))}
+  if(DATA.badges.earned.length>=BADGES.length&&!ei.includes('allbadges')){ce.push({id:'allbadges',date:todayStr()});ne.push(CROSS_BADGES.find(b=>b.id==='allbadges'))}
+  DATA.crossBadges.earned=ce;
+  ne.forEach(b=>showToast(`🌟 获得跨周期勋章：${b.name}！`,'success'));
+}
+function archiveCycle(fromCompletion){if(!DATA.cycle)return;showModal(`<h3>归档当前周期</h3><p>归档后，当前周期的所有数据将保存到归档库中。新周期开启后，将重新生成30天的空白计划。</p><p style="color:var(--success)">✅ 未完成的任务会自动延续到新周期（第一天）。</p><p style="color:var(--text-light)">📚 学习归纳库与写作统计会一直保留累积，不被覆盖。</p><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-danger" onclick="closeModal();startNewCycle()">确认归档并开启新周期</button></div>`)}
+function saveDailySummary(toDb){const t=todayStr();const val=document.getElementById('dailySummaryInput').value.trim();DATA.dailySummary[t]=val;if(toDb){const existing=DATA.database.entries.find(e=>e.category==='每日总结'&&e.date===t);if(val){if(existing){existing.content=val;existing.tags=['每日总结']}else DATA.database.entries.push({id:'sum'+Date.now(),date:t,category:'每日总结',title:'每日总结 '+t,content:val,tags:['每日总结'],source:'summary'})}else if(existing){DATA.database.entries=DATA.database.entries.filter(e=>e!==existing)}saveData();showToast('总结已保存至学习库','success');renderPage('progress');return}saveData();showToast('总结已保存','success')}
+function calcNovelProgress(){let d=0;const t=DATA.novel.outline.length||30;for(let i=1;i<=t;i++){const dd=DATA.novel.dailyData['day'+i];if(dd&&dd.words&&dd.words>=3300)d++}return{done:d,total:t,pct:t?Math.round(d/t*100):0}}
+function calcShortProgress(){let d=0;for(let p=0;p<3;p++){let all=true;for(let i=p*10+1;i<=(p+1)*10;i++){const dd=DATA.short.dailyData['day'+i];if(!dd){all=false;break}const has=(dd.writeTasks&&dd.writeTasks.some(t=>t))||(dd.learnTasks&&dd.learnTasks.some(t=>t));if(!has)all=false}if(all)d++}return{done:d,total:3,pct:Math.round(d/3*100)}}
+function calcVlogProgress(){let d=0;for(let p=0;p<5;p++){if(p*6+1>30)break;let all=true;for(let i=p*6+1;i<=Math.min((p+1)*6,30);i++){const dd=DATA.vlog.dailyData['day'+i];if(!dd){all=false;break}const has=(dd.createTasks&&dd.createTasks.some(t=>t))||(dd.learnTasks&&dd.learnTasks.some(t=>t));if(!has)all=false}if(all)d++}return{done:d,total:5,pct:Math.round(d/5*100)}}
+function updateSidebarCycleInfo(){const el=document.getElementById('sidebarCycleInfo');if(DATA.cycle)el.textContent=`Day ${getCycleDayNum()} / 30`;else el.textContent='未开启周期'}
+
+/* ========== 长篇顺延 ========== */
+function processCarryover(fromDay){const fromKey='day'+fromDay,toKey='day'+(fromDay+1);if(fromDay>=30)return;const fd=DATA.novel.dailyData[fromKey],td=DATA.novel.dailyData[toKey];if(!fd||!td)return;const outline=DATA.novel.outline.find(o=>o.day===fromDay);if(outline&&outline.tasks.length){const inc=[];outline.tasks.forEach((t,i)=>{if(!fd.tasks[i]&&i<fd.tasks.length)inc.push(t)});if(inc.length)td.carryTasks=[...(td.carryTasks||[]),...inc.map(t=>({text:t,done:false}))]}if(fd.customTasks&&fd.customTasks.length){const inc=fd.customTasks.filter(t=>!t.done);if(inc.length)td.carryTasks=[...(td.carryTasks||[]),...inc]}const minWords=outline?(outline.minWords||3300):3300;if(fd.words<minWords)td.carryWords=(td.carryWords||0)+(minWords-fd.words);saveData()}
+function autoProcessCarryover(){if(!DATA.cycle)return;const today=todayStr();if(DATA.lastCarryProcessDate===today)return;const cycleDay=getCycleDayNum();if(cycleDay<=1){DATA.lastCarryProcessDate=today;saveData();return}const lastProcessed=DATA.lastCarryProcessDate?parseDateStr(DATA.lastCarryProcessDate):null;let startDay=1;if(lastProcessed){const startCycle=parseDateStr(DATA.cycle.startDate);const diff=Math.floor((lastProcessed-startCycle)/86400000)+1;if(diff>0&&diff<cycleDay)startDay=diff}for(let d=startDay;d<cycleDay&&d<30;d++)processCarryover(d);DATA.lastCarryProcessDate=today;saveData()}
+
+/* ========== 页面2：长篇小说 ========== */
+let novelSelectedDay=1;let timerState={running:false,type:null,startTime:null,intervalId:null};
+function renderNovelPage(c){
+  if(!DATA.cycle){c.innerHTML='<div class="card"><div class="empty-state"><div class="es-icon">📖</div><div class="es-text">请先在"计划进度"中开启30天周期</div></div></div>';return}
+  novelSelectedDay=Math.min(Math.max(novelSelectedDay,1),30);const today=getCycleDayNum();
+  const tc=document.createElement('div');tc.className='card fade-in';
+  tc.innerHTML=`<div class="card-title">📖 长篇小说 <span class="badge" style="background:var(--accent)">${DATA.novel.outline.length?DATA.novel.outline.length+'章大纲已加载':'无大纲'}</span></div><div style="display:flex;gap:10px;align-items:end;flex-wrap:wrap"><div style="flex:1;min-width:200px"><label style="font-size:.8rem;color:var(--text-light);display:block;margin-bottom:4px">小说标题</label><input type="text" placeholder="输入小说标题" value="${DATA.novel.title||''}" oninput="DATA.novel.title=this.value" onblur="saveData()"></div><button class="btn btn-sm btn-outline" onclick="showOutlineModal()">导入/自定义大纲</button></div>${DATA.novel.outline.length?'<div style="margin-top:8px;font-size:.8rem;color:var(--text-light)">当前大纲：'+(DATA.novel.outline.length)+'章 · '+escapeHtml(DATA.novel.title||'未命名')+'</div>':'<div style="margin-top:8px;font-size:.8rem;color:var(--warning)">⚠️ 尚未导入大纲</div>'}`;
+  c.appendChild(tc);
+  const dc=document.createElement('div');dc.className='card fade-in';
+  let th=`<div class="card-title">📅 选择日期 <span class="badge">今天: Day ${today}</span></div><div class="day-tabs">`;
+  for(let i=1;i<=30;i++){const cls=[];if(i===novelSelectedDay)cls.push('active');if(i===today)cls.push('today');if(i>today)cls.push('preview');const d=DATA.novel.dailyData['day'+i];if(d&&d.words&&d.words>=3300)cls.push('completed');th+=`<button class="day-tab ${cls.join(' ')}" onclick="selectNovelDay(${i})">${i}</button>`}
+  th+='</div>';dc.innerHTML=th;c.appendChild(dc);renderNovelDayDetail(c);
+}
+function selectNovelDay(d){novelSelectedDay=d;renderPage('novel')}
+function renderNovelDayDetail(c){
+  const dk='day'+novelSelectedDay,today=getCycleDayNum();const isPreview=novelSelectedDay>today;
+  const outline=DATA.novel.outline.find(o=>o.day===novelSelectedDay);
+  const dd=DATA.novel.dailyData[dk]||{tasks:[],customTasks:[],words:0,timerSec:0,note:'',carryWords:0,carryTasks:[]};
+  if(!DATA.novel.dailyData[dk])DATA.novel.dailyData[dk]=dd;if(!dd.customTasks)dd.customTasks=[];if(!dd.carryTasks)dd.carryTasks=[];
+  if(isPreview){const pb=document.createElement('div');pb.className='preview-banner fade-in';pb.innerHTML=`<span>👁️ 正在预览 Day ${novelSelectedDay}（尚未到期）</span><button class="btn btn-sm btn-outline" onclick="novelSelectedDay=${getCycleDayNum()};renderPage('novel')">回到今天</button>`;c.appendChild(pb)}
+  if(dd.carryTasks&&dd.carryTasks.length){const cb=document.createElement('div');cb.className='carryover-banner fade-in';cb.innerHTML=`<strong>📥 顺延任务</strong>（来自前几日未完成）：<br>${dd.carryTasks.map((t,i)=>`<label style="display:block;margin-top:4px;cursor:pointer"><input type="checkbox" ${t.done?'checked':''} onchange="toggleCarryTask(${i},this.checked)" style="width:auto;margin-right:6px">${t.done?'<s>':''}${escapeHtml(t.text)}${t.done?'</s>':''}</label>`).join('')}`;c.appendChild(cb)}
+  const detail=document.createElement('div');detail.className='card fade-in';
+  const dayDate=new Date(parseDateStr(DATA.cycle.startDate).getTime()+(novelSelectedDay-1)*86400000);
+  let dh=`<div class="card-title">📝 Day ${novelSelectedDay} ${outline?'· '+escapeHtml(outline.chapterTitle):'章节框架'} <span class="badge" style="background:var(--accent)">${formatDate(dayDate)}</span></div>`;
+  const minWords=outline?(outline.minWords||3300):3300;const wordsPass=dd.words>=minWords;
+  const allTasks=outline?outline.tasks.length+dd.customTasks.length:dd.customTasks.length;
+  const doneTasks=outline?dd.tasks.filter(t=>t).length+dd.customTasks.filter(t=>t.done).length:dd.customTasks.filter(t=>t.done).length;
+  const tasksPass=allTasks>0&&doneTasks===allTasks;
+  dh+=`<div class="completion-status"><span class="completion-pill ${wordsPass?'pass':'fail'}">字数 ${dd.words}/${minWords} ${wordsPass?'✅':'❌'}</span>`;
+  if(allTasks>0)dh+=`<span class="completion-pill ${tasksPass?'pass':'fail'}">任务 ${doneTasks}/${allTasks} ${tasksPass?'✅':'❌'}</span>`;
+  dh+=`</div>`;
+  if(dd.carryWords>0)dh+=`<div class="carryover-banner"><strong>📥 字数顺延</strong>：前几日未完成的字数差额 ${dd.carryWords} 字已累计到今天，今日目标实际为 ${minWords+dd.carryWords} 字</div>`;
+  dh+=prevNoteReminder('novel',novelSelectedDay);
+  if(outline){dh+=`<div style="margin-bottom:14px;padding:12px;background:#F7F8FC;border-radius:8px;font-size:.85rem;color:var(--text-light)">章节概要：${escapeHtml(outline.chapterDesc||'暂无')}</div><div style="font-size:.85rem;font-weight:600;margin-bottom:8px">✅ 今日大纲任务（点击勾选）</div>`;while(dd.tasks.length<outline.tasks.length)dd.tasks.push(false);if(outline.tasks.length===0)dh+='<div style="color:var(--text-light);font-size:.85rem">大纲暂无任务</div>';outline.tasks.forEach((task,idx)=>{const overdue=!dd.tasks[idx]&&novelSelectedDay<today;dh+=`<div class="check-item ${dd.tasks[idx]?'done':''} ${overdue?'overdue':''}" onclick="toggleNovelTask(${idx})"><div class="checkbox"></div><div style="flex:1"><div class="item-text">${escapeHtml(task)}</div>${overdue?'<div class="item-meta">⚠️ 已逾期，将自动顺延到次日</div>':''}</div></div>`})}
+  else{dh+=`<div style="margin-bottom:14px;padding:12px;background:#FFF5E6;border-radius:8px;font-size:.85rem;color:var(--text-light)">⏳ Day ${novelSelectedDay} 尚无大纲内容。</div>`}
+  if(dd.customTasks.length){dh+='<div style="font-size:.85rem;font-weight:600;margin:12px 0 8px">📌 自定义任务</div>';dd.customTasks.forEach((t,idx)=>{const overdue=!t.done&&novelSelectedDay<today;dh+=`<div class="check-item ${t.done?'done':''} ${overdue?'overdue':''}" onclick="toggleNovelCustomTask(${idx})"><div class="checkbox"></div><div style="flex:1"><div class="item-text">${escapeHtml(t.text)}</div>${overdue?'<div class="item-meta">⚠️ 已逾期，将自动顺延</div>':''}</div><button class="btn btn-sm btn-danger" onclick="event.stopPropagation();deleteNovelCustomTask(${idx})" style="padding:3px 8px">删</button></div>`})}
+  dh+=`<div style="margin-top:12px;display:flex;gap:8px"><input type="text" id="newNovelTaskInput" placeholder="添加今日任务..." style="flex:1" onkeydown="if(event.key==='Enter')addNovelCustomTask()"><button class="btn btn-sm" onclick="addNovelCustomTask()">添加</button></div>`;
+  detail.innerHTML=dh;c.appendChild(detail);
+  const tmr=document.createElement('div');tmr.className='card fade-in';
+  tmr.innerHTML=`<div class="card-title">⏱️ 写作计时</div><div class="write-timer-box"><div><div class="timer-display" id="novelTimerDisplay">00:00</div><div class="timer-status" id="novelTimerStatus">${dd.timerSec>0?'今日已写 '+formatDuration(dd.timerSec):'未开始'}</div></div><div class="timer-actions"><button class="btn btn-success" id="novelTimerStart" onclick="startTimer('novel')">▶ 开始写作</button><button class="btn btn-danger hidden" id="novelTimerStop" onclick="stopTimer('novel')">⏸ 停止</button></div></div>`;
+  c.appendChild(tmr);
+  const wc=document.createElement('div');wc.className='card fade-in';const targetWords=minWords+(dd.carryWords||0);const isPass=dd.words>=targetWords;
+  let wh=`<div class="card-title">📊 今日字数 <span class="badge">目标: ${targetWords}字${dd.carryWords>0?' (含顺延'+dd.carryWords+')':''}</span></div><div class="wordcount-box"><div class="wc-input-group"><label>今日写出的字数</label><input type="number" id="novelWordsInput" placeholder="输入字数" value="${dd.words||''}"></div><button class="btn" onclick="saveNovelWords(${targetWords})">记录字数</button></div>`;
+  if(dd.words>0)wh+=`<div class="wordcount-result ${isPass?'pass':'fail'}">${isPass?'✅ 达成目标！':'❌ 还差 '+(targetWords-dd.words)+' 字'}</div>`;
+  wc.innerHTML=wh;c.appendChild(wc);
+  const nc=document.createElement('div');nc.className='card fade-in';
+  nc.innerHTML=`<div class="card-title">🗒️ 当日备注</div><textarea id="novelNoteInput" placeholder="记录今天的写作心得、灵感片段、明日计划..." style="min-height:80px">${escapeHtml(dd.note||'')}</textarea><div style="margin-top:10px"><button class="btn btn-sm" onclick="saveNovelNote()">保存备注</button></div>`;
+  c.appendChild(nc);
+  if(novelSelectedDay<30){const nb=document.createElement('div');nb.className='card fade-in';let pr='';if(wordsPass&&tasksPass)pr='今日任务和字数均已达标，可以提前查看下一天';else if(wordsPass&&!tasksPass)pr='字数已达标（大纲任务未完成将自动顺延），可提前查看下一天';else if(!wordsPass&&tasksPass)pr='大纲任务已完成（字数差额将顺延），可提前查看下一天';else pr='今日字数和任务均未达标。仍可提前查看下一天大纲，但未完成项将自动顺延。';nb.innerHTML=`<div style="text-align:center"><div style="font-size:.85rem;color:var(--text-light);margin-bottom:10px">${pr}</div><button class="btn btn-outline" onclick="processCarryover(${novelSelectedDay});novelSelectedDay=${novelSelectedDay+1};renderPage('novel')">→ 提前查看 Day ${novelSelectedDay+1}</button></div>`;c.appendChild(nb)}
+  updatePetActivity();
+}
+function recordManualWords(type,words){if(!words||words<=0)return;const t=todayStr(),h=new Date().getHours();DATA.stats.writeSessions=DATA.stats.writeSessions.filter(s=>!(s.date===t&&s.type===type&&s.manual));DATA.stats.writeSessions.push({date:t,type,duration:0,words,startTime:new Date().toLocaleTimeString(),endTime:new Date().toLocaleTimeString(),startHour:h,manual:true})}
+function toggleNovelTask(idx){const dk='day'+novelSelectedDay,dd=DATA.novel.dailyData[dk];if(!dd)return;const outline=DATA.novel.outline.find(o=>o.day===novelSelectedDay);if(outline&&idx<outline.tasks.length){if(!dd.tasks[idx]){const h=new Date().getHours();if(h>=22)checkSpecialBadge('nightowl');if(h<7)checkSpecialBadge('earlybird')}dd.tasks[idx]=!dd.tasks[idx]}saveData();checkBadges();checkSpecialBadge('allday');renderPage('novel')}
+function toggleNovelCustomTask(idx){const dk='day'+novelSelectedDay,dd=DATA.novel.dailyData[dk];if(!dd||!dd.customTasks[idx])return;if(!dd.customTasks[idx].done){const h=new Date().getHours();if(h>=22)checkSpecialBadge('nightowl');if(h<7)checkSpecialBadge('earlybird')}dd.customTasks[idx].done=!dd.customTasks[idx].done;saveData();checkBadges();checkSpecialBadge('allday');renderPage('novel')}
+function toggleCarryTask(idx,checked){const dk='day'+novelSelectedDay,dd=DATA.novel.dailyData[dk];if(!dd||!dd.carryTasks[idx])return;dd.carryTasks[idx].done=checked;saveData();checkBadges();checkSpecialBadge('allday')}
+function addNovelCustomTask(){const input=document.getElementById('newNovelTaskInput');const text=input.value.trim();if(!text)return;const dk='day'+novelSelectedDay;const dd=DATA.novel.dailyData[dk]||{tasks:[],customTasks:[],words:0,timerSec:0,note:''};if(!DATA.novel.dailyData[dk])DATA.novel.dailyData[dk]=dd;if(!dd.customTasks)dd.customTasks=[];dd.customTasks.push({text,done:false});saveData();renderPage('novel')}
+function deleteNovelCustomTask(idx){const dk='day'+novelSelectedDay,dd=DATA.novel.dailyData[dk];if(dd&&dd.customTasks){dd.customTasks.splice(idx,1);saveData();renderPage('novel')}}
+function saveNovelWords(target){const w=parseInt(document.getElementById('novelWordsInput').value)||0;const dk='day'+novelSelectedDay;DATA.novel.dailyData[dk].words=w;recordManualWords('novel',w);saveData();if(w>=target){showToast(`🎉 字数达标！${w}字`,'success');checkBadges()}else showToast(`已记录，还差${target-w}字`,'warning');renderPage('novel')}
+function saveNovelNote(){DATA.novel.dailyData['day'+novelSelectedDay].note=document.getElementById('novelNoteInput').value.trim();saveData();showToast('备注已保存','success')}
+
+/* ========== 写作计时器 ========== */
+function startTimer(type){if(timerState.running){showToast('已有计时进行中，请先停止','warning');return}timerState={running:true,type,startTime:Date.now(),intervalId:setInterval(()=>{const e=Math.floor((Date.now()-timerState.startTime)/1000);const d=document.getElementById(type+'TimerDisplay');if(d)d.textContent=formatDuration(e)},1000)};localStorage.setItem('timer_state',JSON.stringify({type,startTime:timerState.startTime}));document.getElementById(type+'TimerStart').classList.add('hidden');document.getElementById(type+'TimerStop').classList.remove('hidden');document.getElementById(type+'TimerStatus').textContent='正在写作中...';const h=new Date().getHours();if(h>=22)checkSpecialBadge('nightowl');if(h<7)checkSpecialBadge('earlybird');updatePetActivity();showToast('开始计时！','success')}
+function stopTimer(type){if(!timerState.running||timerState.type!==type)return;clearInterval(timerState.intervalId);const elapsed=Math.floor((Date.now()-timerState.startTime)/1000);timerState.running=false;localStorage.removeItem('timer_state');const dk=getCurrentDayKey();if(type==='novel'){const d=DATA.novel.dailyData[dk]||{tasks:[],customTasks:[],words:0,timerSec:0,note:''};if(!DATA.novel.dailyData[dk])DATA.novel.dailyData[dk]=d;d.timerSec=(d.timerSec||0)+elapsed}else if(type==='short'){const d=DATA.short.dailyData[dk]||{learnTasks:[],writeTasks:[],words:0,timerSec:0,note:''};if(!DATA.short.dailyData[dk])DATA.short.dailyData[dk]=d;d.timerSec=(d.timerSec||0)+elapsed}const session={date:todayStr(),type,duration:elapsed,words:0,startTime:new Date(timerState.startTime).toLocaleTimeString(),endTime:new Date().toLocaleTimeString(),startHour:new Date(timerState.startTime).getHours()};DATA.stats.writeSessions.push(session);checkSpecialBadge('marathon',{duration:elapsed});saveData();checkBadges();document.getElementById(type+'TimerStart').classList.remove('hidden');document.getElementById(type+'TimerStop').classList.add('hidden');document.getElementById(type+'TimerStatus').textContent='本次写作 '+formatDuration(elapsed);showToast(`本次写作时长：${formatDuration(elapsed)}`,'success');showWordCountModal(type,elapsed);updatePetActivity()}
+function showWordCountModal(type,elapsed){showModal(`<h3>📝 写作记录</h3><p>本次写作时长：<strong>${formatDuration(elapsed)}</strong></p><div style="margin-bottom:14px"><label style="font-size:.85rem;display:block;margin-bottom:6px">本次写作字数（可选）</label><input type="number" id="wordCountInput" placeholder="输入字数，如 2000" onkeydown="if(event.key==='Enter')confirmWordCount(${elapsed})"></div><div class="modal-actions"><button class="btn btn-outline" onclick="skipWordCount()">跳过</button><button class="btn" onclick="confirmWordCount(${elapsed})">确认</button></div>`);setTimeout(()=>{const inp=document.getElementById('wordCountInput');if(inp)inp.focus()},100)}
+function confirmWordCount(elapsed){const w=document.getElementById('wordCountInput').value.trim();closeModal();if(!w||isNaN(w))return;const n=parseInt(w),type=timerState.type||'novel';const dk=getCurrentDayKey();const session=DATA.stats.writeSessions[DATA.stats.writeSessions.length-1];if(session){session.words=n;const m=elapsed/60;if(m>0){const sp=Math.round(n/m);checkSpecialBadge('speedwriter',{speed:sp});showToast(`速度：${sp} 字/分钟`,'success')}}if(type==='novel'){DATA.novel.dailyData[dk].words=(DATA.novel.dailyData[dk].words||0)+n}else if(type==='short'){DATA.short.dailyData[dk].words=(DATA.short.dailyData[dk].words||0)+n}saveData();checkBadges();renderPage(type)}
+function skipWordCount(){closeModal();const type=timerState.type||'novel';renderPage(type)}
+function restoreTimer(){try{const saved=JSON.parse(localStorage.getItem('timer_state'));if(!saved||!saved.startTime)return;const elapsed=Math.floor((Date.now()-saved.startTime)/1000);if(elapsed>12*3600){localStorage.removeItem('timer_state');return}timerState={running:true,type:saved.type,startTime:saved.startTime,intervalId:setInterval(()=>{const e=Math.floor((Date.now()-timerState.startTime)/1000);const d=document.getElementById(timerState.type+'TimerDisplay');if(d)d.textContent=formatDuration(e)},1000)};showToast(`⏱️ 已恢复${saved.type==='novel'?'长篇':'短篇'}写作计时（已进行 ${formatDuration(elapsed)}）`,'success')}catch(e){console.error('restore timer fail',e)}}
+
+/* ========== 页面3：短篇小说 ========== */
+let shortSelectedDay=1,shortSubTab='learn';
+function renderShortPage(c){
+  if(!DATA.cycle){c.innerHTML='<div class="card"><div class="empty-state"><div class="es-icon">✍️</div><div class="es-text">请先在"计划进度"中开启30天周期</div></div></div>';return}
+  shortSelectedDay=Math.min(Math.max(shortSelectedDay,1),30);const today=getCycleDayNum();
+  const dc=document.createElement('div');dc.className='card fade-in';
+  let th=`<div class="card-title">✍️ 短篇小说 · 30天3篇（10天一篇） <span class="badge">今天: Day ${today}</span></div><div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">`;
+  for(let p=0;p<3;p++)th+=`<div style="font-size:.75rem;padding:3px 10px;border-radius:10px;background:#EEF0F5">第${p+1}篇: Day ${p*10+1}-${(p+1)*10}</div>`;
+  th+='</div><div class="day-tabs">';
+  for(let i=1;i<=30;i++){const cls=[];if(i===shortSelectedDay)cls.push('active');if(i===today)cls.push('today');if(i>today)cls.push('preview');const d=DATA.short.dailyData['day'+i];if(d&&((d.writeTasks&&d.writeTasks.some(t=>t))||(d.learnTasks&&d.learnTasks.some(t=>t))))cls.push('completed');th+=`<button class="day-tab ${cls.join(' ')}" onclick="selectShortDay(${i})">${i}</button>`}
+  th+='</div>';dc.innerHTML=th;c.appendChild(dc);
+  const st=document.createElement('div');st.className='card fade-in';st.innerHTML=`<div class="sub-tabs"><button class="sub-tab ${shortSubTab==='learn'?'active':''}" onclick="switchShortSub('learn')">📚 学习</button><button class="sub-tab ${shortSubTab==='write'?'active':''}" onclick="switchShortSub('write')">✍️ 写作</button></div>`;c.appendChild(st);
+  if(shortSubTab==='learn')renderShortLearn(c);else renderShortWrite(c);updatePetActivity();
+}
+function selectShortDay(d){shortSelectedDay=d;renderPage('short')}
+function switchShortSub(t){shortSubTab=t;renderPage('short')}
+function renderShortLearn(c){const card=document.createElement('div');card.className='card fade-in';let h=`<div class="card-title">📚 学习 · 爆款拆解与写作技巧</div><div style="font-size:.82rem;color:var(--text-light);margin-bottom:14px">以下是本轮模板，建议每篇写作前研读对应内容。</div>`;(DATA.short.learnTemplates||[]).forEach(t=>{h+=`<div class="learn-card"><div><span class="lc-tag">${escapeHtml(t.tag)}</span></div><div class="lc-title">${escapeHtml(t.title)}</div><div class="lc-content">${escapeHtml(t.content)}</div><div style="margin-top:8px"><button class="btn btn-sm btn-outline" onclick="saveToDatabase('短篇学习','${t.title.replace(/'/g,"\\'")}','${t.content.replace(/'/g,"\\'")}',${JSON.stringify(['短篇',t.tag])})">归档到数据库</button></div></div>`});card.innerHTML=h;c.appendChild(card)}
+function renderShortWrite(c){
+  const dk='day'+shortSelectedDay,today=getCycleDayNum();
+  const dd=DATA.short.dailyData[dk]||{learnTasks:[],writeTasks:[],words:0,timerSec:0,note:''};
+  if(!DATA.short.dailyData[dk])DATA.short.dailyData[dk]=dd;
+  const cycleDay=((shortSelectedDay-1)%10)+1,storyNum=Math.floor((shortSelectedDay-1)/10)+1;
+  const isPreview=shortSelectedDay>today;
+  const tpl=(DATA.short.writeTemplates||SHORT_WRITE_DEFAULT)[cycleDay-1]||(DATA.short.writeTemplates||SHORT_WRITE_DEFAULT)[0];
+  while(dd.writeTasks.length<tpl.tasks.length)dd.writeTasks.push(false);
+  if(isPreview){const pb=document.createElement('div');pb.className='preview-banner fade-in';pb.innerHTML=`<span>👁️ 正在预览 Day ${shortSelectedDay}</span><button class="btn btn-sm btn-outline" onclick="shortSelectedDay=${getCycleDayNum()};renderPage('short')">回到今天</button>`;c.appendChild(pb)}
+  const card=document.createElement('div');card.className='card fade-in';
+  const dayDate=new Date(parseDateStr(DATA.cycle.startDate).getTime()+(shortSelectedDay-1)*86400000);
+  let h=`<div class="card-title">✍️ 写作 · 第${storyNum}篇 · Day ${shortSelectedDay}（本篇第${cycleDay}天） <span class="badge" style="background:var(--accent)">${formatDate(dayDate)}</span></div>`;
+  h+=`<div style="margin-bottom:12px;padding:10px;background:#F0F4FF;border-radius:8px;font-size:.82rem">📊 本篇进度：${cycleDay} / 10 天${cycleDay===1?' · 🎯 今日重点：拆解对标作品':''}${cycleDay>=4&&cycleDay<=7?' · 🎯 今日重点：动笔写作':''}${cycleDay>=8?' · 🎯 今日重点：修改定稿':''}</div>`;
+  h+=prevNoteReminder('short',shortSelectedDay);
+  h+='<div style="font-size:.85rem;font-weight:600;margin-bottom:8px">✅ 今日任务（点击勾选）</div>';
+  tpl.tasks.forEach((task,idx)=>{const overdue=!dd.writeTasks[idx]&&shortSelectedDay<today;h+=`<div class="check-item ${dd.writeTasks[idx]?'done':''} ${overdue?'overdue':''}" onclick="toggleShortWriteTask(${idx})"><div class="checkbox"></div><div style="flex:1"><div class="item-text">${escapeHtml(task)}</div>${overdue?'<div class="item-meta">⚠️ 已逾期，将自动顺延</div>':''}</div></div>`});
+  if(cycleDay===10)h+=`<div style="margin-top:12px;padding:10px;background:#FFF5E6;border-radius:8px"><label style="font-size:.85rem;display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" ${dd.storyComplete?'checked':''} onchange="markShortStoryComplete(this.checked)" style="width:auto">✅ 本篇已完成并发布</label></div>`;
+  card.innerHTML=h;c.appendChild(card);
+  const tmr=document.createElement('div');tmr.className='card fade-in';
+  tmr.innerHTML=`<div class="card-title">⏱️ 写作计时</div><div class="write-timer-box"><div><div class="timer-display" id="shortTimerDisplay">00:00</div><div class="timer-status" id="shortTimerStatus">${dd.timerSec>0?'今日已写 '+formatDuration(dd.timerSec):'未开始'}</div></div><div class="timer-actions"><button class="btn btn-success" id="shortTimerStart" onclick="startTimer('short')">▶ 开始写作</button><button class="btn btn-danger hidden" id="shortTimerStop" onclick="stopTimer('short')">⏸ 停止</button></div></div>`;
+  c.appendChild(tmr);
+  const wc=document.createElement('div');wc.className='card fade-in';
+  wc.innerHTML=`<div class="card-title">📊 今日字数</div><div class="wordcount-box"><div class="wc-input-group"><label>今日写出的字数</label><input type="number" id="shortWordsInput" placeholder="输入字数" value="${dd.words||''}"></div><button class="btn" onclick="saveShortWords()">记录字数</button></div><div style="font-size:.8rem;color:var(--text-light);margin-top:8px">短篇无每日最低字数限制，按10天循环完成一篇即可。</div>`;
+  c.appendChild(wc);
+  const nc=document.createElement('div');nc.className='card fade-in';
+  nc.innerHTML=`<div class="card-title">🗒️ 当日备注</div><textarea id="shortNoteInput" placeholder="记录今天的写作心得、灵感、明日计划..." style="min-height:80px">${escapeHtml(dd.note||'')}</textarea><div style="margin-top:10px"><button class="btn btn-sm" onclick="saveShortNote()">保存备注</button></div>`;
+  c.appendChild(nc);
+  if(shortSelectedDay<30){const nb=document.createElement('div');nb.className='card fade-in';const allDone=dd.writeTasks.every(t=>t);nb.innerHTML=`<div style="text-align:center"><div style="font-size:.85rem;color:var(--text-light);margin-bottom:10px">${allDone?'今日任务已全部完成，可以提前查看下一天':'今日任务尚未全部完成，仍可提前查看下一天（未完成项将自动顺延）'}</div><button class="btn btn-outline" onclick="shortSelectedDay=${shortSelectedDay+1};renderPage('short')">→ 提前查看 Day ${shortSelectedDay+1}</button></div>`;c.appendChild(nb)}
+}
+function toggleShortWriteTask(idx){const dk='day'+shortSelectedDay,dd=DATA.short.dailyData[dk];if(!dd)return;if(!dd.writeTasks[idx]){const h=new Date().getHours();if(h>=22)checkSpecialBadge('nightowl');if(h<7)checkSpecialBadge('earlybird')}dd.writeTasks[idx]=!dd.writeTasks[idx];saveData();checkBadges();checkSpecialBadge('allday');renderPage('short')}
+function markShortStoryComplete(v){const dk='day'+shortSelectedDay,d=DATA.short.dailyData[dk];if(d){d.storyComplete=v;saveData();if(v){showToast('🎉 完成一篇短篇！','success');checkBadges()}}}
+function saveShortWords(){const w=parseInt(document.getElementById('shortWordsInput').value)||0;DATA.short.dailyData['day'+shortSelectedDay].words=w;recordManualWords('short',w);saveData();showToast('字数已记录','success');renderPage('short')}
+function saveShortNote(){DATA.short.dailyData['day'+shortSelectedDay].note=document.getElementById('shortNoteInput').value.trim();saveData();showToast('备注已保存','success')}
+
+/* ========== 页面4：Vlog ========== */
+let vlogSelectedDay=1,vlogSubTab='learn';
+function renderVlogPage(c){
+  if(!DATA.cycle){c.innerHTML='<div class="card"><div class="empty-state"><div class="es-icon">🎬</div><div class="es-text">请先在"计划进度"中开启30天周期</div></div></div>';return}
+  vlogSelectedDay=Math.min(Math.max(vlogSelectedDay,1),30);const today=getCycleDayNum();
+  const dc=document.createElement('div');dc.className='card fade-in';
+  let th=`<div class="card-title">🎬 Vlog · 30天5条（6天一条） <span class="badge">今天: Day ${today}</span></div><div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">`;
+  for(let p=0;p<5;p++){if(p*6+1>30)break;th+=`<div style="font-size:.75rem;padding:3px 10px;border-radius:10px;background:#EEF0F5">第${p+1}条: Day ${p*6+1}-${Math.min((p+1)*6,30)}</div>`}
+  th+='</div><div class="day-tabs">';
+  for(let i=1;i<=30;i++){const cls=[];if(i===vlogSelectedDay)cls.push('active');if(i===today)cls.push('today');if(i>today)cls.push('preview');const d=DATA.vlog.dailyData['day'+i];if(d&&((d.createTasks&&d.createTasks.some(t=>t))||(d.learnTasks&&d.learnTasks.some(t=>t))))cls.push('completed');th+=`<button class="day-tab ${cls.join(' ')}" onclick="selectVlogDay(${i})">${i}</button>`}
+  th+='</div>';dc.innerHTML=th;c.appendChild(dc);
+  const st=document.createElement('div');st.className='card fade-in';st.innerHTML=`<div class="sub-tabs"><button class="sub-tab ${vlogSubTab==='learn'?'active':''}" onclick="switchVlogSub('learn')">📚 学习</button><button class="sub-tab ${vlogSubTab==='create'?'active':''}" onclick="switchVlogSub('create')">🎥 创作</button></div>`;c.appendChild(st);
+  if(vlogSubTab==='learn')renderVlogLearn(c);else renderVlogCreate(c);updatePetActivity();
+}
+function selectVlogDay(d){vlogSelectedDay=d;renderPage('vlog')}
+function switchVlogSub(t){vlogSubTab=t;renderPage('vlog')}
+function renderVlogLearn(c){const card=document.createElement('div');card.className='card fade-in';let h=`<div class="card-title">📚 学习 · 对标账号与创作技巧</div><div style="font-size:.82rem;color:var(--text-light);margin-bottom:14px">以下是本轮模板，建议按方向去搜索具体账号对标。</div>`;(DATA.vlog.learnTemplates||[]).forEach(t=>{h+=`<div class="learn-card"><div><span class="lc-tag">${escapeHtml(t.tag)}</span></div><div class="lc-title">${escapeHtml(t.title)}</div><div class="lc-content">${escapeHtml(t.content)}</div><div style="margin-top:8px"><button class="btn btn-sm btn-outline" onclick="saveToDatabase('Vlog学习','${t.title.replace(/'/g,"\\'")}','${t.content.replace(/'/g,"\\'")}',${JSON.stringify(['Vlog',t.tag])})">归档到数据库</button></div></div>`});card.innerHTML=h;c.appendChild(card)}
+function renderVlogCreate(c){
+  const dk='day'+vlogSelectedDay,today=getCycleDayNum();
+  const dd=DATA.vlog.dailyData[dk]||{learnTasks:[],createTasks:[],note:''};
+  if(!DATA.vlog.dailyData[dk])DATA.vlog.dailyData[dk]=dd;
+  const cycleDay=((vlogSelectedDay-1)%6)+1,videoNum=Math.floor((vlogSelectedDay-1)/6)+1;
+  const isPreview=vlogSelectedDay>today;
+  const tpl=(DATA.vlog.createTemplates||VLOG_CREATE_DEFAULT)[cycleDay-1]||(DATA.vlog.createTemplates||VLOG_CREATE_DEFAULT)[0];
+  while(dd.createTasks.length<tpl.tasks.length)dd.createTasks.push(false);
+  if(isPreview){const pb=document.createElement('div');pb.className='preview-banner fade-in';pb.innerHTML=`<span>👁️ 正在预览 Day ${vlogSelectedDay}</span><button class="btn btn-sm btn-outline" onclick="vlogSelectedDay=${getCycleDayNum()};renderPage('vlog')">回到今天</button>`;c.appendChild(pb)}
+  const card=document.createElement('div');card.className='card fade-in';
+  const dayDate=new Date(parseDateStr(DATA.cycle.startDate).getTime()+(vlogSelectedDay-1)*86400000);
+  let h=`<div class="card-title">🎥 创作 · 第${videoNum}条 · Day ${vlogSelectedDay}（本条第${cycleDay}天） <span class="badge" style="background:var(--accent)">${formatDate(dayDate)}</span></div>`;
+  h+=`<div style="margin-bottom:12px;padding:10px;background:#FFF5E6;border-radius:8px;font-size:.82rem">📊 本条进度：${cycleDay} / 6 天${cycleDay===1?' · 🎯 今日重点：定脚本框架':''}${cycleDay===3?' · 🎯 今日重点：拍摄素材':''}${cycleDay===4?' · 🎯 今日重点：剪辑':''}${cycleDay===5?' · 🎯 今日重点：发布':''}</div>`;
+  h+=prevNoteReminder('vlog',vlogSelectedDay);
+  h+='<div style="font-size:.85rem;font-weight:600;margin-bottom:8px">✅ 今日任务（点击勾选）</div>';
+  tpl.tasks.forEach((task,idx)=>{const overdue=!dd.createTasks[idx]&&vlogSelectedDay<today;h+=`<div class="check-item ${dd.createTasks[idx]?'done':''} ${overdue?'overdue':''}" onclick="toggleVlogCreateTask(${idx})"><div class="checkbox"></div><div style="flex:1"><div class="item-text">${escapeHtml(task)}</div>${overdue?'<div class="item-meta">⚠️ 已逾期，将自动顺延</div>':''}</div></div>`});
+  if(cycleDay===6)h+=`<div style="margin-top:12px;padding:10px;background:#FFF5E6;border-radius:8px"><label style="font-size:.85rem;display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" ${dd.videoComplete?'checked':''} onchange="markVlogComplete(this.checked)" style="width:auto">✅ 本条视频已完成发布</label></div>`;
+  card.innerHTML=h;c.appendChild(card);
+  const nc=document.createElement('div');nc.className='card fade-in';
+  nc.innerHTML=`<div class="card-title">🗒️ 当日备注</div><textarea id="vlogNoteInput" placeholder="记录今天的创作心得、灵感、素材..." style="min-height:80px">${escapeHtml(dd.note||'')}</textarea><div style="margin-top:10px"><button class="btn btn-sm" onclick="saveVlogNote()">保存备注</button></div>`;
+  c.appendChild(nc);
+  if(vlogSelectedDay<30){const nb=document.createElement('div');nb.className='card fade-in';const allDone=dd.createTasks.every(t=>t);nb.innerHTML=`<div style="text-align:center"><div style="font-size:.85rem;color:var(--text-light);margin-bottom:10px">${allDone?'今日任务已全部完成，可以提前查看下一天':'今日任务尚未全部完成，仍可提前查看下一天（未完成项将自动顺延）'}</div><button class="btn btn-outline" onclick="vlogSelectedDay=${vlogSelectedDay+1};renderPage('vlog')">→ 提前查看 Day ${vlogSelectedDay+1}</button></div>`;c.appendChild(nb)}
+}
+function toggleVlogCreateTask(idx){const dk='day'+vlogSelectedDay,dd=DATA.vlog.dailyData[dk];if(!dd)return;if(!dd.createTasks[idx]){const h=new Date().getHours();if(h>=22)checkSpecialBadge('nightowl');if(h<7)checkSpecialBadge('earlybird')}dd.createTasks[idx]=!dd.createTasks[idx];saveData();checkBadges();checkSpecialBadge('allday');renderPage('vlog')}
+function markVlogComplete(v){const dk='day'+vlogSelectedDay,d=DATA.vlog.dailyData[dk];if(d){d.videoComplete=v;saveData();if(v){showToast('🎉 完成一条Vlog！','success');checkBadges()}}}
+function saveVlogNote(){DATA.vlog.dailyData['day'+vlogSelectedDay].note=document.getElementById('vlogNoteInput').value.trim();saveData();showToast('备注已保存','success')}
+
+/* ========== 页面5：学习归纳数据库（三栏） ========== */
+let dbMainTab='stats',dbFilter='all',dbSearchQuery='',statsRange='all';
+function renderDatabasePage(c){
+  // 主分栏
+  const mc=document.createElement('div');mc.className='card fade-in';
+  mc.innerHTML=`<div class="db-maintabs">
+    <button class="sub-tab ${dbMainTab==='stats'?'active':''}" onclick="dbMainTab='stats';renderPage('database')">📊 写作数据统计</button>
+    <button class="sub-tab ${dbMainTab==='library'?'active':''}" onclick="dbMainTab='library';renderPage('database')">📚 学习归纳库</button>
+    <button class="sub-tab ${dbMainTab==='summary'?'active':''}" onclick="dbMainTab='summary';renderPage('database')">📝 每日总结</button>
+  </div>`;
+  c.appendChild(mc);
+  if(dbMainTab==='stats')renderDbStats(c);
+  else if(dbMainTab==='library')renderDbLibrary(c);
+  else renderDbSummary(c);
+  updatePetActivity();
+}
+function renderDbStats(c){
+  const sessions=DATA.stats.writeSessions||[];
+  // 范围选择
+  const rs=document.createElement('div');rs.className='card fade-in';
+  let rh=`<div class="card-title">📊 写作数据统计</div><div class="range-selector">`;
+  ['7','14','30','all'].forEach(r=>{rh+=`<button class="filter-btn ${statsRange===r?'active':''}" onclick="statsRange='${r}';renderPage('database')">${r==='all'?'全部历史':'近'+r+'天'}</button>`});
+  rh+=`<input type="number" id="customRange" placeholder="自定义天数" min="1" max="9999" value="" onchange="if(this.value){statsRange=this.value;renderPage('database')}"></div>`;
+  // 统计
+  let days=0;
+  if(statsRange==='all')days=9999;
+  else days=parseInt(statsRange)||7;
+  const startDate=new Date(Date.now()-days*86400000);
+  const ranged=sessions.filter(s=>parseDateStr(s.date)>=startDate);
+  const todayS=sessions.filter(s=>s.date===todayStr());
+  const totalWords=sessions.reduce((a,b)=>a+(b.words||0),0);
+  const rangedWords=ranged.reduce((a,b)=>a+(b.words||0),0);
+  const totalDur=sessions.reduce((a,b)=>a+(b.duration||0),0);
+  const rangedDur=ranged.reduce((a,b)=>a+(b.duration||0),0);
+  const avgSpeed=totalDur>0?Math.round(totalWords/(totalDur/60)):0;
+  rh+=`<div class="stats-grid">
+    <div class="stat-box"><div class="sb-value">${todayS.length}</div><div class="sb-label">今日写作次数</div></div>
+    <div class="stat-box"><div class="sb-value">${todayS.reduce((a,b)=>a+(b.words||0),0)}</div><div class="sb-label">今日字数</div></div>
+    <div class="stat-box"><div class="sb-value">${ranged.length}</div><div class="sb-label">区间写作次数</div></div>
+    <div class="stat-box"><div class="sb-value">${rangedWords}</div><div class="sb-label">区间字数</div></div>
+    <div class="stat-box"><div class="sb-value">${totalWords}</div><div class="sb-label">累计字数（永久）</div></div>
+    <div class="stat-box"><div class="sb-value">${avgSpeed}</div><div class="sb-label">平均字/分钟</div></div>
+  </div>`;
+  rs.innerHTML=rh;c.appendChild(rs);
+  if(sessions.length===0){const e=document.createElement('div');e.className='card fade-in';e.innerHTML='<div class="empty-state"><div class="es-icon">📊</div><div class="es-text">还没有写作记录，去长篇/短篇开始计时吧！</div></div>';c.appendChild(e);return}
+  // 气泡图（几点写的/写多少）
+  const bc=document.createElement('div');bc.className='chart-container fade-in';
+  const maxW=Math.max(...sessions.map(s=>s.words||0),1);
+  let bh=`<div class="chart-title">🕐 写作时段气泡图（横轴=小时0-23，气泡大小=字数，颜色=类型）</div><div class="bubble-legend"><span class="lg"><span class="dot" style="background:#6C5CE7"></span>长篇</span><span class="lg"><span class="dot" style="background:#00CEC9"></span>短篇</span></div><div class="bubble-chart">`;
+  // 网格线
+  for(let h=0;h<=24;h+=3){bh+=`<div class="hour-grid" style="left:${(h/24*100)}%"></div><span class="hour-label" style="left:${(h/24*100)}%">${h}时</span>`}
+  // 气泡
+  ranged.forEach((s,idx)=>{
+    const hr=s.startHour||0;
+    const left=(hr/24*100);
+    const size=Math.max(12,Math.min(50,(s.words||0)/maxW*45+12));
+    const color=s.type==='novel'?'#6C5CE7':'#00CEC9';
+    const top=100-Math.min(70,(s.words||0)/maxW*60)-10;
+    bh+=`<div class="bubble" style="left:${left}%;bottom:${100-top}%;width:${size}px;height:${size}px;background:${color}" title="${s.date} ${s.startTime||''} · ${s.type==='novel'?'长篇':'短篇'} · ${s.words||0}字 · ${formatDuration(s.duration||0)}"></div>`;
+  });
+  bh+='</div>';bc.innerHTML=bh;c.appendChild(bc);
+  // 24小时柱状图
+  const hc=document.createElement('div');hc.className='chart-container fade-in';
+  const hourBuckets=Array(24).fill(0);
+  ranged.forEach(s=>{hourBuckets[s.startHour||0]+=(s.words||0)});
+  const maxHB=Math.max(...hourBuckets,1);
+  let hh=`<div class="chart-title">📈 各小时写作字数（24h）</div><div class="bar-chart" style="min-width:600px">`;
+  hourBuckets.forEach((w,h)=>{const pct=w>0?Math.max(3,Math.round(w/maxHB*100)):0;hh+=`<div class="bar" style="height:${pct}%" title="${h}时: ${w}字">${w>0?`<div class="bar-val">${w}</div>`:''}<div class="bar-label">${h}</div></div>`});
+  hh+='</div>';hc.innerHTML=hh;c.appendChild(hc);
+  // 写作记录明细（几点写、写多少）
+  const tl=document.createElement('div');tl.className='card fade-in';
+  const grouped={};
+  ranged.slice().reverse().forEach(s=>{if(!grouped[s.date])grouped[s.date]=[];grouped[s.date].push(s)});
+  let thtml=`<div class="card-title">📝 写作记录明细（最近在前）</div><div class="session-timeline">`;
+  const dates=Object.keys(grouped).sort((a,b)=>b>a?1:-1);
+  if(dates.length===0)thtml+='<div class="empty-state"><div class="es-icon">🗒️</div><div class="es-text">该区间暂无记录</div></div>';
+  dates.forEach(d=>{
+    thtml+=`<div class="session-day"><div class="sd-date">${d}（${grouped[d].length}次）</div>`;
+    grouped[d].forEach(s=>{
+      const color=s.type==='novel'?'#6C5CE7':'#00CEC9';
+      const label=s.type==='novel'?'长篇':'短篇';
+      thtml+=`<div class="session-item"><span class="si-type" style="background:${color}">${label}</span><span class="si-time">${s.startTime||'--'}</span><span class="si-dur">${formatDuration(s.duration||0)}</span><span class="si-words">${s.words||0}字</span></div>`;
+    });
+    thtml+='</div>';
+  });
+  thtml+='</div>';tl.innerHTML=thtml;c.appendChild(tl);
+}
+function renderDbLibrary(c){
+  // 添加新条目
+  const ac=document.createElement('div');ac.className='card fade-in';
+  ac.innerHTML=`<div class="card-title">➕ 添加学习内容</div><div style="margin-bottom:10px"><label style="font-size:.8rem;color:var(--text-light);display:block;margin-bottom:4px">标题</label><input type="text" id="dbNewTitle" placeholder="标题或链接说明"></div><div style="margin-bottom:10px"><label style="font-size:.8rem;color:var(--text-light);display:block;margin-bottom:4px">内容/链接</label><textarea id="dbNewContent" placeholder="粘贴链接、笔记、心得..." style="min-height:60px"></textarea></div><div style="margin-bottom:10px"><label style="font-size:.8rem;color:var(--text-light);display:block;margin-bottom:4px">分类标签（逗号分隔）</label><input type="text" id="dbNewTags" placeholder="如：短篇,结构,三幕剧"></div><div style="margin-bottom:10px"><label style="font-size:.8rem;color:var(--text-light);display:block;margin-bottom:4px">来源</label><select id="dbNewSource"><option value="manual">手动添加</option><option value="novel">长篇</option><option value="short">短篇</option><option value="vlog">Vlog</option></select></div><button class="btn" onclick="addDbEntry()">添加</button>`;
+  c.appendChild(ac);
+  // 分类筛选 + 搜索
+  const fc=document.createElement('div');fc.className='card fade-in';
+  const allTags=['all',...new Set(DATA.database.entries.flatMap(e=>e.tags||[]))];
+  let fh='<div class="card-title">📚 学习归档库</div>';
+  fh+=`<div class="search-box"><input type="text" placeholder="🔍 搜索标题或内容..." value="${escapeHtml(dbSearchQuery)}" oninput="dbSearchQuery=this.value;clearTimeout(window._dbSearchTimer);window._dbSearchTimer=setTimeout(()=>renderPage('database'),300)"></div>`;
+  fh+='<div class="db-filter">';
+  allTags.forEach(t=>{fh+=`<button class="filter-btn ${dbFilter===t?'active':''}" onclick="dbFilter='${t}';renderPage('database')">${t==='all'?'全部':escapeHtml(t)}</button>`});
+  fh+='</div>';
+  let filtered=dbFilter==='all'?DATA.database.entries:DATA.database.entries.filter(e=>(e.tags||[]).includes(dbFilter));
+  if(dbSearchQuery.trim()){const q=dbSearchQuery.trim().toLowerCase();filtered=filtered.filter(e=>(e.title||'').toLowerCase().includes(q)||(e.content||'').toLowerCase().includes(q))}
+  if(filtered.length===0)fh+='<div class="empty-state"><div class="es-icon">📂</div><div class="es-text">暂无内容，在上方添加或在其他栏目归档</div></div>';
+  else{filtered.slice().reverse().forEach(e=>{fh+=`<div class="db-entry"><div class="de-header"><div class="de-title">${escapeHtml(e.title)}</div><div class="de-date">${e.date} · ${(e.source==='manual'?'手动':e.source==='novel'?'长篇':e.source==='short'?'短篇':e.source==='summary'?'总结':'Vlog')}<button class="btn btn-sm btn-danger" onclick="deleteDbEntry('${e.id}')" style="margin-left:8px;padding:2px 8px">删</button></div></div><div class="de-content">${escapeHtml(e.content)}</div><div class="de-tags">${(e.tags||[]).map(t=>`<span class="lc-tag">${escapeHtml(t)}</span>`).join('')}</div></div>`})}
+  fc.innerHTML=fh;c.appendChild(fc);
+}
+function renderDbSummary(c){
+  const sc=document.createElement('div');sc.className='card fade-in';
+  let h=`<div class="card-title">📝 每日总结（跨周期累积）</div>`;
+  const dates=Object.keys(DATA.dailySummary).sort((a,b)=>b>a?1:-1);
+  if(dates.length===0)h+='<div class="empty-state"><div class="es-icon">📝</div><div class="es-text">暂无每日总结，去"计划进度"页面记录吧</div></div>';
+  dates.forEach(d=>{
+    h+=`<div class="summary-card"><div class="sc-date">${d}</div><div>${escapeHtml(DATA.dailySummary[d]||'')}</div></div>`;
+  });
+  sc.innerHTML=h;c.appendChild(sc);
+}
+function saveToDatabase(source,title,content,tags){const e={id:'db'+Date.now(),date:todayStr(),category:source,title,content,tags:tags||[],source:source==='短篇学习'?'short':source==='Vlog学习'?'vlog':'manual'};DATA.database.entries.push(e);saveData();showToast('已归档到数据库','success')}
+function addDbEntry(){const title=document.getElementById('dbNewTitle').value.trim();const content=document.getElementById('dbNewContent').value.trim();const tagsRaw=document.getElementById('dbNewTags').value.trim();const source=document.getElementById('dbNewSource').value;if(!title&&!content){showToast('请输入标题或内容','warning');return}const tags=tagsRaw?tagsRaw.split(/[,，、]/).map(t=>t.trim()).filter(t=>t):[];DATA.database.entries.push({id:'db'+Date.now(),date:todayStr(),category:source,title:title||'无标题',content,tags,source});saveData();showToast('已添加','success');renderPage('database')}
+function deleteDbEntry(id){DATA.database.entries=DATA.database.entries.filter(e=>e.id!==id);saveData();renderPage('database')}
+
+/* ========== 导出/导入 ========== */
+function exportData(){const blob=new Blob([JSON.stringify({data:DATA,archive:loadArchive()},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`creative-tracker-${todayStr()}.json`;a.click();URL.revokeObjectURL(url);showToast('数据已导出','success')}
+function exportDatabaseBackup(){const payload={type:'creative_tracker_db_backup',date:todayStr(),database:DATA.database,stats:DATA.stats,crossBadges:DATA.crossBadges,cycleRewards:DATA.cycleRewards,dailySummary:DATA.dailySummary};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`creative-tracker-db-${todayStr()}.json`;a.click();URL.revokeObjectURL(url);showToast('学习库与统计已独立导出','success')}
+function importData(input){const file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{try{const obj=JSON.parse(e.target.result);if(obj.type==='creative_tracker_db_backup'){DATA.database=obj.database||DATA.database;DATA.stats=obj.stats||DATA.stats;DATA.crossBadges=obj.crossBadges||DATA.crossBadges;DATA.cycleRewards=obj.cycleRewards||DATA.cycleRewards;DATA.dailySummary=obj.dailySummary||DATA.dailySummary;saveData();showToast('学习库与统计已导入','success');renderPage(currentPage);return}if(obj.data)DATA=obj.data;if(obj.archive)saveArchive(obj.archive);saveData();showToast('数据已导入','success');renderPage(currentPage);updateSidebarCycleInfo()}catch(err){showToast('导入失败：文件格式错误','warning')}};reader.readAsText(file)}
+
+function renamePet(){showModal(`<h3>✏️ 给宠物改名</h3><div><label style="font-size:.85rem;display:block;margin-bottom:6px">宠物名字</label><input type="text" id="petNameInput" value="${escapeHtml(DATA.pet.name)}" placeholder="输入名字"></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn" onclick="confirmRenamePet()">确认</button></div>`);setTimeout(()=>{const inp=document.getElementById('petNameInput');if(inp){inp.focus();inp.select()}},100)}
+function confirmRenamePet(){const name=document.getElementById('petNameInput').value.trim();if(name){DATA.pet.name=name;saveData();closeModal();showToast('改名成功！','success');if(currentPage==='progress')renderPage('progress')}else{showToast('名字不能为空','warning')}}
+function showOutlineModal(){showModal(`<h3>导入大纲</h3><p>输入你的小说大纲，系统自动分配到30天。</p><button class="outline-option-btn" onclick="showCustomOutlineForm()"><div class="oo-title">✍️ 输入自定义大纲</div><div class="oo-desc">输入你自己的小说大纲，支持任意天数（1-30天）</div></button><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">取消</button></div>`)}
+function showCustomOutlineForm(){const example='1|第一章 觉醒|主角发现异常|写开头场景;描写发现异常的细节;结尾留钩子|3300\n2|第二章 系统降临|系统出现并发布任务|写系统降临场景;主角的反应;结尾钩子|3300';showModal(`<h3>自定义大纲</h3><p style="font-size:.82rem">每行一个章节，用 <code style="background:#F0F0F4;padding:1px 4px;border-radius:3px">|</code> 分隔字段：</p><div style="font-size:.75rem;color:var(--text-light);background:#F7F8FC;padding:8px 12px;border-radius:6px;margin-bottom:12px;line-height:1.6">格式：<strong>天数|章节标题|章节描述|任务1;任务2;任务3|最低字数</strong><br>字数可省略（默认3300）</div><textarea id="customOutlineInput" placeholder="${example}" style="min-height:160px;font-size:.82rem;font-family:monospace"></textarea><div class="modal-actions"><button class="btn btn-outline" onclick="showOutlineModal()">返回</button><button class="btn" onclick="loadCustomOutline()">加载大纲</button></div>`)}
+function loadCustomOutline(){const raw=document.getElementById('customOutlineInput').value.trim();if(!raw){showToast('请输入大纲内容','warning');return}const lines=raw.split('\n').filter(l=>l.trim());const outline=[];for(const line of lines){const parts=line.split('|').map(p=>p.trim());if(parts.length<4){showToast('格式错误，每行至少4个字段','warning');return}const day=parseInt(parts[0]);if(!day||day<1||day>30){showToast('天数必须1-30，错误行：'+line.substring(0,20),'warning');return}const tasks=parts[3].split(';').map(t=>t.trim()).filter(t=>t);const minWords=parts[4]?parseInt(parts[4])||3300:3300;outline.push({day,chapterTitle:parts[1],chapterDesc:parts[2],tasks,minWords})}if(!outline.length){showToast('未解析到有效大纲','warning');return}outline.sort((a,b)=>a.day-b.day);DATA.novel.outline=outline;saveData();closeModal();showToast(`已加载自定义大纲：${outline.length}章`,'success');if(currentPage==='novel')renderPage('novel')}
+
+/* ========== 初始化 ========== */
+updateSidebarCycleInfo();updateStorageUsage();autoProcessCarryover();renderPage('progress');restoreTimer();
+setInterval(()=>{if(currentPage==='progress'){const p=getPetState();const el=document.querySelector('.pet-emoji');if(el)el.textContent=p.emoji}},60000);
+
+/* ========== PWA 安装引导（iPad 优化） ========== */
+let deferredPrompt=null;
+const isStandalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
+const isIPad=/iPad|Macintosh/.test(navigator.userAgent)&&'ontouchend' in document;
+const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+if(!isStandalone){
+  window.addEventListener('beforeinstallprompt',e=>{
+    e.preventDefault();deferredPrompt=e;
+    const btn=document.getElementById('installBtn');if(btn)btn.style.display='inline-flex';
+    const tip=document.getElementById('installTip');
+    if(tip)tip.textContent='点击右侧"安装"按钮，像原生App一样使用';
+    setTimeout(()=>document.getElementById('installBanner').classList.add('show'),2000);
+  });
+  if(isIPad||isIOS){
+    const tip=document.getElementById('installTip');
+    const deviceName=isIPad?'iPad':'iPhone';
+    if(tip)tip.innerHTML=`<b>${deviceName} 添加步骤：</b>Safari 顶部地址栏右侧点「分享」<span style="font-size:1.2rem">↗</span> →「添加到主屏幕」`;
+    const btn=document.getElementById('installBtn');
+    if(btn){btn.style.display='inline-flex';btn.textContent='查看教程';btn.style.background='#00CEC9'}
+    setTimeout(()=>document.getElementById('installBanner').classList.add('show'),1500);
+  }else{
+    setTimeout(()=>{const banner=document.getElementById('installBanner');if(banner&&!banner.classList.contains('show'))banner.classList.add('show')},3000);
+  }
+}
+document.getElementById('installBtn').addEventListener('click',()=>{
+  if(deferredPrompt){
+    deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null;document.getElementById('installBanner').classList.remove('show')});
+  }else{
+    const deviceName=isIPad?'iPad':(isIOS?'iPhone':'设备');
+    showModal(`<h3>📱 安装到${deviceName}主屏幕</h3>
+<div style="background:#F0F4FF;border-radius:12px;padding:16px;margin:12px 0;text-align:center">
+  <div style="font-size:3rem;margin-bottom:8px">📲</div>
+  <p style="font-weight:600;margin:0 0 12px">安装后就像原生 App 一样使用</p>
+</div>
+<div style="font-size:.85rem;line-height:2;color:var(--text-light)">
+<strong>📱 iPad / iPhone（Safari 浏览器）</strong><br>
+① 点击 Safari 地址栏右侧的 <span style="background:#E8E8ED;padding:2px 8px;border-radius:4px">分享 ↗</span> 按钮<br>
+② 在弹出菜单中向下滚动，找到 <strong>「添加到主屏幕」</strong><br>
+③ 点击右上角 <strong>「添加」</strong> 完成<br>
+④ 回到主屏幕，点击 ✍️ 图标即可像 App 一样打开！
+</div>
+<div style="font-size:.85rem;line-height:2;color:var(--text-light);margin-top:12px">
+<strong>💻 电脑（Chrome/Edge）</strong><br>
+① 点击地址栏右侧「安装」图标<br>
+② 或浏览器菜单 →「安装此应用」
+</div>
+<div style="font-size:.85rem;line-height:2;color:var(--text-light);margin-top:12px">
+<strong>📱 安卓手机</strong><br>
+① 浏览器菜单 →「添加到主屏幕」
+</div>
+<div class="modal-actions"><button class="btn" onclick="closeModal()">知道了</button></div>`);
+  }
+});
+/* 横竖屏切换自适应 */
+function handleOrientationChange(){const savedInputs={};document.querySelectorAll('textarea, input[type="text"], input[type="number"]').forEach(el=>{if(el.id)savedInputs[el.id]=el.value});renderPage(currentPage);Object.keys(savedInputs).forEach(id=>{const el=document.getElementById(id);if(el)el.value=savedInputs[id]})}
+window.addEventListener('orientationchange',()=>setTimeout(handleOrientationChange,150));
+let resizeTimer;window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(handleOrientationChange,200)});
+</script>
+</body>
+</html>
